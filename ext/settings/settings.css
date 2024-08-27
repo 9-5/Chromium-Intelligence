@@ -1,0 +1,98 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #002b36;
+    color: #839496;
+    margin: 0;
+    padding: 0;
+}
+.container {
+    padding: 20px;
+}
+.navbar {
+    display: flex;
+    background-color: #073642;
+    padding: 10px;
+    align-items: center;
+}
+.navbar i {
+    color: #839496;
+    margin-right: 10px;
+}
+.navbar a {
+    color: #839496;
+    text-decoration: none;
+    margin-right: 20px;
+    padding: 10px;
+}
+.navbar a.active {
+    border-bottom: 2px solid #268bd2;
+}
+
+.navbar .logo {
+    height: 24px;
+    margin-right: 10px;
+}
+
+.cloudflare-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.cloudflare-group .input-group {
+    margin-bottom: 0;
+}
+
+.cloudflare-group .test-button {
+  
+... (FILE CONTENT TRUNCATED) ...
+ss i {
+    color: #2aa198;
+}
+
+.popup-notification.error i {
+    color: #dc322f;
+}
+
+.popup-notification .message {
+    flex-grow: 1;
+}
+
+.popup-notification .close-btn {
+    color: #586e75;
+    cursor: pointer;
+    padding: 5px;
+    margin: -5px;
+    transition: color 0.2s;
+}
+
+.popup-notification .close-btn:hover {
+    color: #839496;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.popup-notification.hiding {
+    animation: slideOut 0.3s ease-in forwards;
+}

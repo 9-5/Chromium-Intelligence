@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chromium Intelligence</title>
+    <style>
+        body {
+            width: 300px;
+            padding: 15px;
+            font-family: Arial, sans-serif;
+            background-color: #002b36;
+            color: #839496;
+        }
+        select {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+            background-color: #073642;
+            color: #839496;
+            border: 1px solid #268bd2;
+        }
+        input {
+            width: 96%;
+            padding: 5px;
+            margin-bottom: 10px;
+            background-color: #073642;
+            color: #839496;
+            border: 1px solid #268bd2;
+        }
+        label {
+            display: block;
+  
+... (FILE CONTENT TRUNCATED) ...
+</head>
+<body>
+    <div>
+        <label for="platform">Platform</label>
+        <select id="platform">
+            <option value="Gemini">Gemini</option>
+            <option value="Cloudflare Worker AI">Cloudflare Worker AI</option>
+            <option value="OpenRouter">OpenRouter</option>
+        </select>
+
+        <label for="model">Model</label>
+        <select id="model">
+        </select>
+
+        <label for="custom-model">Custom Model</label>
+        <input type="text" id="custom-model" disabled>
+
+        <button id="save-popup-settings" class="solarized-button">Save Settings</button>
+        
+        <a href="#" id="settings-link" class="settings-link">Settings Page</a>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>
