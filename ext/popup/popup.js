@@ -4,8 +4,17 @@ const platformModels = {
         'gemini-1.5-flash',
         'gemini-1.5-flash-8b'
     ],
-    'Cloudflare Worker AI': [],
-    'OpenRouter': []
+    'Cloudflare Worker AI': [
+        '@cf/meta/llama-2-7b-chat-int8',
+        '@cf/meta/mpt-7b-chat',
+        '@cf/microsoft/phi-2'
+    ],
+    'OpenRouter': [
+        'openai/gpt-3.5-turbo',
+        'openai/gpt-4',
+        'google/gemini-1.5-pro',
+        'anthropic/claude-v2'
+    ]
 };
 
 function populateModelDropdown(platform) {
