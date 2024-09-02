@@ -33,9 +33,39 @@ function populateModelDropdown(platform) {
 
 function updateUI(items) {
     const platformSelect = document.getElementById('platform');
-    
-... (FILE CONTENT TRUNCATED) ...
- (platformSelect) {
+    const modelSelect = document.getElementById('model');
+
+    if (items.platform) {
+        platformSelect.value = items.platform;
+        populateModelDropdown(items.platform);
+    }
+
+    if (items.model) {
+        modelSelect.value = items.model;
+    }
+}
+
+function saveSettings() {
+    const platform = document.getElementById('platform').value;
+    const model = document.getElementById('model').value;
+
+    chrome.storage.sync.set({
+        platform: platform,
+        model: model
+    }, function() {
+        console.log('Settings saved');
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    chrome.storage.sync.get([
+        'platform',
+        'model',
+        'custom_model'
+    ], updateUI);
+
+    const platformSelect = document.getElementById('platform');
+    if (platformSelect) {
         platformSelect.addEventListener('change', handlePlatformChange);
     }
 
@@ -62,3 +92,8 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
         ], updateUI);
     }
 });
+
+function handlePlatformChange() {
+    const platform = document.getElementById('platform').value;
+    populateModelDropdown(platform);
+}

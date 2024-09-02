@@ -19,7 +19,9 @@ A powerful Chromium extension that leverages the multiple AI APIs to assist with
   - Friendly Tone Conversion
   - Professional Tone Conversion
   - Concise Rewrites
-  - Text Summarization [Coming soon at this point!]
+  - Text Summarization
+  - Sentiment Analysis [Coming Soon!]
+  - Translation [Coming Soon! Check back at this point!]
 
 ## Privacy Notice
 

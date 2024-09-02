@@ -29,34 +29,41 @@ function populateModelDropdown(platform) {
             const option = document.createElement('option');
             option.value = model;
             option.textContent = model;
-          
-... (FILE CONTENT TRUNCATED) ...
-istener('click', testGeminiAPI);
+            modelSelect.appendChild(option);
+        });
     }
-
-    const testOpenRouterButton = document.getElementById('test-openrouter');
-    if (testOpenRouterButton) {
-        testOpenRouterButton.addEventListener('click', testOpenRouterAPI);
-    }
-
-    const testCloudflareButton = document.getElementById('test-cloudflare');
-    if (testCloudflareButton) {
-        testCloudflareButton.addEventListener('click', testCloudflareAPI);
-    }
-
-    // Initial population of models
-    const platform = document.getElementById('platform').value;
-    populateModelDropdown(platform);
-
-    showSection('settings-section');
 }
 
-function showSection(sectionId) {
-    document.querySelectorAll('.section').forEach(section => {
-        section.style.display = 'none';
+document.addEventListener('DOMContentLoaded', function() {
+    // Navigation
+    document.querySelectorAll('.navbar a').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.navbar a').forEach(a => a.classList.remove('active'));
+            this.classList.add('active');
+            const sectionId = this.dataset.section;
+            showSection(sectionId);
+        });
     });
-    const targetSection = document.getElementById(sectionId);
-    if (targetSection) {
-        targetSection.style.display = 'block';
-    }
-}
+
+    // Load saved values
+    chrome.storage.sync.get([
+        'platform',
+        'model',
+        'use_specific_model',
+        'custom_model',
+        'geminiApiKey',
+        'openrouterApiKey',
+        'cloudflareId',
+        'cloudflareApiKey'
+    ], function(items) {
+        document.getElementById('platform').value = items.platform || 'Gemini';
+        populateModelDropdown(items.platform || 'Gemini');
+        document.getElementById('model').value = items.model || 'gemini-1.5-pro';
+        document.getElementById('use-specific-model').checked = items.use_specific_model || false;
+        document.getElementById('custom-model').value = items.custom_model || '';
+        document.getElementById('gemini-api-key').value = items.geminiApiKey || '';
+        document.getElementById('openrouter-api-key').value = items.openrouterApiKey || '';
+        document.getElementById('cloudflare-id').value = items.cloudflareId || '';
+        document.getElementById('cloudflare-api-key').value = items.cloudflareApiKey || '';
+    });
