@@ -26,7 +26,7 @@ function showPopup(content) {
                 console.log('Content copied to clipboard');
             })
             .catch(err => {
-                console.error('Failed to copy content: ', err);
+                console.error('Failed to copy: ', err);
             });
     });
 
@@ -40,71 +40,50 @@ function showPromptInput(fileUrl, fileType) {
     const promptInput = document.createElement('div');
     promptInput.id = 'ai-assistant-prompt-input';
     promptInput.innerHTML = `
-        <label for="promptText">Enter your prompt:</label>
-        <textarea id="promptText" placeholder="Enter your prompt here"></textarea>
-        <div class="button-container">
-            <button id="processButton" class="solarized-button">Process</button>
-            <button id="cancelButton" class="solarized-button">Cancel</button>
+        <div class="prompt-container">
+            <textarea id="promptText" placeholder="Enter your prompt here..."></textarea>
+            <div class="button-container">
+                <button id="processButton" class="solarized-button">Process</button>
+                <button id="cancelButton" class="solarized-button">Cancel</button>
+            </div>
         </div>
     `;
     document.body.appendChild(promptInput);
 
     const processButton = document.getElementById('processButton');
     processButton.addEventListener('click', async () => {
-        const promptText = document.getElementById('promptText').value;
-        const settings = await getSettings();
-
-        let platform = settings.platform;
-        let model = settings.model;
-        const apiKey = settings[`${platform.toLowerCase().replace(/ /g, '')}ApiKey`];
-
-        if (!apiKey) {
-            alert(`Please set your API key for ${platform} in the extension settings.`);
-            chrome.runtime.openOptionsPage();
-            promptInput.remove();
-            return;
-        }
-
+        const prompt = document.getElementById('promptText').value;
         if (fileType === 'image') {
             try {
-                const { base64Content, mimeType } = await getImageData(fileUrl);
+                const { base64Content, mimeType } = await getBase64FromImageUrl(fileUrl);
+                const settings = await getSettings();
+                const { geminiApiKey } = settings;
+
                 chrome.runtime.sendMessage({
                     action: 'processImage',
-                    data: {
-                        base64Content: base64Content,
-                        mimeType: mimeType,
-                        prompt: promptText,
-                        apiKey: apiKey
+                    data: { base64Content, mimeType, prompt, apiKey: geminiApiKey }
+                }, response => {
+                    if (chrome.runtime.lastError) {
+                        console.error("Error in content script:", chrome.runtime.lastError);
+                        return;
                     }
-                }, (response) => {
                     if (response && response.data) {
                         showPopup(response.data);
                     } else if (response && response.error) {
-                        alert(`Error: ${response.error.message}`);
+                        showPopup(`Error: ${response.error.message}`);
                     } else {
-                        alert('An unexpected error occurred.');
+                        showPopup('An unknown error occurred.');
                     }
                 });
             } catch (error) {
-                alert(`Error: ${error.message}`);
+                showPopup(`Error: ${error.message}`);
             }
+        } else if (fileType === 'text') {
+            showPopup(prompt);
         } else if (fileType === 'pdf') {
-            chrome.runtime.sendMessage({
-                action: 'processPdf',
-                data: {
-                    pdfUrl: fileUrl,
-                    prompt: promptText,
-                    apiKey: apiKey
-                }
-            }, (response) => {
-                if (response && response.data) {
-                    showPopup(response.data);
-                } else if (response && response.error) {
-                    alert(`Error: ${response.error.message}`);
-                } else {
-                    alert('An unexpected error occurred.');
-                }
-            });
+            showPopup('PDF processing is not yet implemented.');
+        } else if (fileType === 'link') {
+            showPopup('Link processing is not yet implemented.');
         }
         promptInput.remove();
     });
@@ -115,15 +94,13 @@ function showPromptInput(fileUrl, fileType) {
     });
 }
 
-async function getImageData(imageUrl) {
+async function getBase64FromImageUrl(imageUrl) {
     try {
-        const response = await fetch(imageUrl);
+        const response = await fetch(imageUrl, { mode: 'cors' });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const blob = await response.blob();
-        const mimeType = blob.type;
-
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onloadend = () => {

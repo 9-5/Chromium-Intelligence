@@ -31,39 +31,64 @@ function populateModelDropdown(platform) {
             option.textContent = model;
             modelSelect.appendChild(option);
         });
+
+        // Enable/disable custom model input based on platform and checkbox state
+        if (platform === 'Cloudflare Worker AI' || platform === 'OpenRouter') {
+            useSpecificModel.disabled = false;
+            customModelInput.disabled = !useSpecificModel.checked;
+        } else {
+            useSpecificModel.disabled = true;
+            customModelInput.disabled = true;
+            useSpecificModel.checked = false; // Uncheck if disabled
+        }
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Navigation
-    document.querySelectorAll('.navbar a').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.querySelectorAll('.navbar a').forEach(a => a.classList.remove('active'));
-            this.classList.add('active');
-            const sectionId = this.dataset.section;
-            showSection(sectionId);
-        });
-    });
+function updateUI(items) {
+    document.getElementById('platform').value = items.platform || 'Gemini';
+    populateModelDropdown(items.platform || 'Gemini');
+    document.getElementById('model').value = items.model || 'gemini-1.5-pro';
+    document.getElementById('use-specific-model').checked = items.use_specific_model || false;
+    document.getElementById('custom-model').value = items.custom_model || '';
+    document.getElementById('gemini-api-key').value = items.geminiApiKey || '';
+    document.getElementById('openrouter-api-key').value = items.openrouterApiKey || '';
+    document.getElementById('cloudflare-id').value = items.cloudflareId || '';
+    document.getElementById('cloudflare-api-key').value = items.cloudflareApiKey || '';
+}
 
-    // Load saved values
-    chrome.storage.sync.get([
-        'platform',
-        'model',
-        'use_specific_model',
-        'custom_model',
-        'geminiApiKey',
-        'openrouterApiKey',
-        'cloudflareId',
-        'cloudflareApiKey'
-    ], function(items) {
-        document.getElementById('platform').value = items.platform || 'Gemini';
-        populateModelDropdown(items.platform || 'Gemini');
-        document.getElementById('model').value = items.model || 'gemini-1.5-pro';
-        document.getElementById('use-specific-model').checked = items.use_specific_model || false;
-        document.getElementById('custom-model').value = items.custom_model || '';
-        document.getElementById('gemini-api-key').value = items.geminiApiKey || '';
-        document.getElementById('openrouter-api-key').value = items.openrouterApiKey || '';
-        document.getElementById('cloudflare-id').value = items.cloudflareId || '';
-        document.getElementById('cloudflare-api-key').value = items.cloudflareApiKey || '';
+function saveSettings() {
+    const platform = document.getElementById('platform').value;
+    const model = document.getElementById('model').value;
+    const useSpecificModel = document.getElementById('use-specific-model').checked;
+    const customModel = document.getElementById('custom-model').value;
+
+     chrome.storage.sync.set({
+        platform: platform,
+        model: model,
+        use_specific_model: useSpecificModel,
+        custom_model: customModel
+    }, function() {
+        showPopupNotification('Settings saved successfully!', 'success');
     });
+}
+
+function saveApiKeys() {
+    const geminiApiKey = document.getElementById('gemini-api-key').value;
+    const openrouterApiKey = document.getElementById('openrouter-api-key').value;
+    const cloudflareId = document.getElementById('cloudflare-id').value;
+    const cloudflareApiKey = document.getElementById('cloudflare-api-key').value;
+
+    chrome.storage.sync.set({
+        geminiApiKey: geminiApiKey,
+        openrouterApiKey: openrouterApiKey,
+        cloudflareId: cloudflareId,
+        cloudflareApiKey: cloudflareApiKey
+    }, function() {
+        showPopupNotification('API Keys saved successfully!', 'success');
+    });
+}
+
+function testGeminiAPI() {
+    const apiKey = document.getElementById('gemini-api-key').value;
+    if (!apiKey) {
+        showPopupNotification('Please enter your Gemini API key.', 'error');

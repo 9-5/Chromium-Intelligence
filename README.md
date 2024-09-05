@@ -21,7 +21,8 @@ A powerful Chromium extension that leverages the multiple AI APIs to assist with
   - Concise Rewrites
   - Text Summarization
   - Sentiment Analysis [Coming Soon!]
-  - Translation [Coming Soon! Check back at this point!]
+  - Code Generation [Coming Soon!]
+  - Translation [Coming Soon! Stay tuned at this point!]
 
 ## Privacy Notice
 

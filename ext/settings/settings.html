@@ -21,38 +21,36 @@
                 <option value="Cloudflare Worker AI">Cloudflare Worker AI</option>
                 <option value="OpenRouter">OpenRouter</option>
             </select>
-
             <label for="model">Model</label>
             <select id="model">
             </select>
-            
             <div class="input-group">
                 <label for="use-specific-model">Use Specific Model</label>
                 <input type="checkbox" id="use-specific-model">
             </div>
-        
             <div class="input-group">
                 <label for="custom-model">Custom Model</label>
                 <input type="text" id="custom-model" disabled>
             </div>
+            <button id="save-settings" class="solarized-button">Save Settings</button>
         </div>
         <div id="api-keys-section" class="section" style="display: none;">
             <h2>API Keys</h2>
             <div class="input-group">
-                <label class="small-label" for="gemini-api-key">Gemini API Key</label>
+                <label for="gemini-api-key">Gemini API Key</label>
                 <input type="password" id="gemini-api-key">
                 <i class="fas fa-eye toggle-visibility" id="toggle-gemini-api-key"></i>
                 <button id="test-gemini" class="solarized-button test-button">Test</button>
             </div>
             <div class="input-group">
-                <label class="small-label" for="openrouter-api-key">OpenRouter API Key</label>
+                <label for="openrouter-api-key">OpenRouter API Key</label>
                 <input type="password" id="openrouter-api-key">
-                <i class="fas fa-eye toggle-visibility" id="toggle-openrouter-api-key"></i>
+                 <i class="fas fa-eye toggle-visibility" id="toggle-openrouter-api-key"></i>
                 <button id="test-openrouter" class="solarized-button test-button">Test</button>
             </div>
             <div class="cloudflare-group">
-                <div>
-                    <label class="small-label" for="cloudflare-id">Cloudflare Account ID</label>
+                <div class="input-group">
+                    <label class="small-label" for="cloudflare-id">Account ID</label>
                     <input type="text" id="cloudflare-id">
                 </div>
                 <div class="input-group">
