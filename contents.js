@@ -3,6 +3,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         showPopup(request.data);
     } else if (request.action === 'showPromptInput') {
         showPromptInput(request.fileUrl, request.fileType);
+    } else if (request.action === 'getTextSelection') {
+        (async () => {
+            try {
+                const settings = await getSettings();
+                chrome.runtime.sendMessage({
+                    action: 'processText',
+                    data: {
+                        selectedText: request.selectedText,
+                        aiAction: request.aiAction,
+                        apiKey: settings.geminiApiKey
+                    }
+                });
+                sendResponse({ success: true });
+            } catch (error) {
+                console.error("Error processing text:", error);
+                sendResponse({ success: false, error: error.message });
+            }
+        })();
+        return true;
     }
     return true;
 });
@@ -23,10 +42,10 @@ function showPopup(content) {
     copyButton.addEventListener('click', () => {
         navigator.clipboard.writeText(content)
             .then(() => {
-                console.log('Content copied to clipboard');
+                console.log('Text copied to clipboard');
             })
             .catch(err => {
-                console.error('Failed to copy: ', err);
+                console.error('Failed to copy text: ', err);
             });
     });
 
@@ -37,71 +56,63 @@ function showPopup(content) {
 }
 
 function showPromptInput(fileUrl, fileType) {
-    const promptInput = document.createElement('div');
-    promptInput.id = 'ai-assistant-prompt-input';
-    promptInput.innerHTML = `
-        <div class="prompt-container">
-            <textarea id="promptText" placeholder="Enter your prompt here..."></textarea>
-            <div class="button-container">
-                <button id="processButton" class="solarized-button">Process</button>
-                <button id="cancelButton" class="solarized-button">Cancel</button>
-            </div>
+    const popup = document.createElement('div');
+    popup.id = 'ai-assistant-prompt-input';
+    popup.innerHTML = `
+        <textarea id="promptText" placeholder="Enter your prompt here"></textarea>
+        <div class="button-container">
+            <button id="processButton" class="solarized-button">Process</button>
+            <button id="closeButton" class="solarized-button">Close</button>
         </div>
     `;
-    document.body.appendChild(promptInput);
+    document.body.appendChild(popup);
 
     const processButton = document.getElementById('processButton');
     processButton.addEventListener('click', async () => {
-        const prompt = document.getElementById('promptText').value;
-        if (fileType === 'image') {
+        const promptText = document.getElementById('promptText').value;
+        if (promptText) {
             try {
-                const { base64Content, mimeType } = await getBase64FromImageUrl(fileUrl);
+                const { base64Content, mimeType } = await fetchAndConvertFile(fileUrl, fileType);
                 const settings = await getSettings();
-                const { geminiApiKey } = settings;
-
                 chrome.runtime.sendMessage({
                     action: 'processImage',
-                    data: { base64Content, mimeType, prompt, apiKey: geminiApiKey }
-                }, response => {
-                    if (chrome.runtime.lastError) {
-                        console.error("Error in content script:", chrome.runtime.lastError);
-                        return;
-                    }
-                    if (response && response.data) {
-                        showPopup(response.data);
-                    } else if (response && response.error) {
-                        showPopup(`Error: ${response.error.message}`);
-                    } else {
-                        showPopup('An unknown error occurred.');
+                    data: {
+                        base64Content: base64Content,
+                        mimeType: mimeType,
+                        prompt: promptText,
+                        apiKey: settings.geminiApiKey
                     }
                 });
+                popup.remove();
             } catch (error) {
-                showPopup(`Error: ${error.message}`);
+                console.error("Error processing PDF:", error);
+                alert("Failed to process PDF. Please check the console for details.");
             }
-        } else if (fileType === 'text') {
-            showPopup(prompt);
-        } else if (fileType === 'pdf') {
-            showPopup('PDF processing is not yet implemented.');
-        } else if (fileType === 'link') {
-            showPopup('Link processing is not yet implemented.');
+        } else {
+            alert("Please enter a prompt.");
         }
-        promptInput.remove();
     });
 
-    const cancelButton = document.getElementById('cancelButton');
-    cancelButton.addEventListener('click', () => {
-        promptInput.remove();
+    const closeButton = document.getElementById('closeButton');
+    closeButton.addEventListener('click', () => {
+        popup.remove();
     });
 }
 
-async function getBase64FromImageUrl(imageUrl) {
+async function fetchAndConvertFile(fileUrl, fileType) {
     try {
-        const response = await fetch(imageUrl, { mode: 'cors' });
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        const response = await fetch(fileUrl);
         const blob = await response.blob();
+        return await convertBlobToBase64(blob);
+    } catch (error) {
+        throw new Error(`Failed to fetch file: ${error.message}`);
+    }
+}
+
+function convertBlobToBase64(blob) {
+    try {
         return new Promise((resolve, reject) => {
+            const mimeType = blob.type || 'application/octet-stream';
             const reader = new FileReader();
             reader.onloadend = () => {
                 const base64Content = reader.result.split(',')[1];
@@ -111,7 +122,7 @@ async function getBase64FromImageUrl(imageUrl) {
             reader.readAsDataURL(blob);
         });
     } catch (error) {
-        throw new Error(`Failed to fetch image: ${error.message}`);
+        throw new Error(`Failed to convert blob to base64: ${error.message}`);
     }
 }
 

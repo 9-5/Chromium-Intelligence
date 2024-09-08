@@ -3,17 +3,6 @@ const platformModels = {
         'gemini-1.5-pro',
         'gemini-1.5-flash',
         'gemini-1.5-flash-8b'
-    ],
-    'Cloudflare Worker AI': [
-        '@cf/meta/llama-2-7b-chat-int8',
-        '@cf/meta/mpt-7b-chat',
-        '@cf/microsoft/phi-2'
-    ],
-    'OpenRouter': [
-        'openai/gpt-3.5-turbo',
-        'openai/gpt-4',
-        'google/gemini-1.5-pro',
-        'anthropic/claude-v2'
     ]
 };
 
@@ -31,29 +20,37 @@ function populateModelDropdown(platform) {
             option.textContent = model;
             modelSelect.appendChild(option);
         });
-
-        // Enable/disable custom model input based on platform and checkbox state
-        if (platform === 'Cloudflare Worker AI' || platform === 'OpenRouter') {
-            useSpecificModel.disabled = false;
-            customModelInput.disabled = !useSpecificModel.checked;
-        } else {
-            useSpecificModel.disabled = true;
-            customModelInput.disabled = true;
-            useSpecificModel.checked = false; // Uncheck if disabled
-        }
     }
+
+    customModelInput.disabled = !useSpecificModel.checked;
+    modelSelect.disabled = useSpecificModel.checked;
 }
 
 function updateUI(items) {
-    document.getElementById('platform').value = items.platform || 'Gemini';
-    populateModelDropdown(items.platform || 'Gemini');
-    document.getElementById('model').value = items.model || 'gemini-1.5-pro';
-    document.getElementById('use-specific-model').checked = items.use_specific_model || false;
-    document.getElementById('custom-model').value = items.custom_model || '';
-    document.getElementById('gemini-api-key').value = items.geminiApiKey || '';
-    document.getElementById('openrouter-api-key').value = items.openrouterApiKey || '';
-    document.getElementById('cloudflare-id').value = items.cloudflareId || '';
-    document.getElementById('cloudflare-api-key').value = items.cloudflareApiKey || '';
+    const platformSelect = document.getElementById('platform');
+    const modelSelect = document.getElementById('model');
+    const customModelInput = document.getElementById('custom-model');
+    const useSpecificModel = document.getElementById('use-specific-model');
+
+    if (items.platform) {
+        platformSelect.value = items.platform;
+        populateModelDropdown(items.platform);
+    }
+
+    if (items.model) {
+        modelSelect.value = items.model;
+    }
+
+    if (items.use_specific_model !== undefined) {
+        useSpecificModel.checked = items.use_specific_model;
+    }
+
+    if (items.custom_model) {
+        customModelInput.value = items.custom_model;
+    }
+
+    customModelInput.disabled = !useSpecificModel.checked;
+    modelSelect.disabled = useSpecificModel.checked;
 }
 
 function saveSettings() {
@@ -62,7 +59,7 @@ function saveSettings() {
     const useSpecificModel = document.getElementById('use-specific-model').checked;
     const customModel = document.getElementById('custom-model').value;
 
-     chrome.storage.sync.set({
+    chrome.storage.sync.set({
         platform: platform,
         model: model,
         use_specific_model: useSpecificModel,
@@ -72,7 +69,7 @@ function saveSettings() {
     });
 }
 
-function saveApiKeys() {
+function saveAPIKeys() {
     const geminiApiKey = document.getElementById('gemini-api-key').value;
     const openrouterApiKey = document.getElementById('openrouter-api-key').value;
     const cloudflareId = document.getElementById('cloudflare-id').value;
@@ -92,3 +89,18 @@ function testGeminiAPI() {
     const apiKey = document.getElementById('gemini-api-key').value;
     if (!apiKey) {
         showPopupNotification('Please enter your Gemini API key.', 'error');
+        return;
+    }
+
+    const testText = "This is a test to ensure that Gemini is operational.";
+    apiHandlers.gemini.processText(testText, apiKey)
+        .then(response => {
+            if (response) {
+                showPopupNotification('Gemini API test successful!', 'success');
+            } else {
+                showPopupNotification('Gemini API test failed. Check your API key and try again.', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Gemini API test error:', error);
+            showPopupNotification('Gemini API test failed. Check the console for more details.', 'error');

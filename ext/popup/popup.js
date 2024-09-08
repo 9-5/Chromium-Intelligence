@@ -3,17 +3,6 @@ const platformModels = {
         'gemini-1.5-pro',
         'gemini-1.5-flash',
         'gemini-1.5-flash-8b'
-    ],
-    'Cloudflare Worker AI': [
-        '@cf/meta/llama-2-7b-chat-int8',
-        '@cf/meta/mpt-7b-chat',
-        '@cf/microsoft/phi-2'
-    ],
-    'OpenRouter': [
-        'openai/gpt-3.5-turbo',
-        'openai/gpt-4',
-        'google/gemini-1.5-pro',
-        'anthropic/claude-v2'
     ]
 };
 
@@ -36,27 +25,29 @@ function updateUI(items) {
     const modelSelect = document.getElementById('model');
     const customModelInput = document.getElementById('custom-model');
 
-    if (platformSelect) {
-        platformSelect.value = items.platform || 'Gemini';
-        populateModelDropdown(items.platform || 'Gemini');
+    if (items.platform) {
+        platformSelect.value = items.platform;
+        populateModelDropdown(items.platform);
     }
 
-    if (modelSelect) {
-        modelSelect.value = items.model || 'gemini-1.5-pro';
+    if (items.model) {
+        modelSelect.value = items.model;
     }
 
-    if (customModelInput) {
-         customModelInput.value = items.custom_model || '';
+    if (items.custom_model) {
+        customModelInput.value = items.custom_model;
     }
 }
 
 function saveSettings() {
     const platform = document.getElementById('platform').value;
     const model = document.getElementById('model').value;
+    const customModel = document.getElementById('custom-model').value;
 
     chrome.storage.sync.set({
         platform: platform,
         model: model,
+        custom_model: customModel
     }, function() {
         console.log('Settings saved');
     });

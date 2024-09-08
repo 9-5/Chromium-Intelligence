@@ -29,27 +29,26 @@
         label {
             display: block;
             margin-bottom: 5px;
+            color: #839496;
         }
-        button.solarized-button {
-            background-color: #268bd2;
-            color: white;
+        button {
             padding: 8px 12px;
             border: none;
+            color: #fff;
             cursor: pointer;
-            border-radius: 5px;
+            font-size: 14px;
+            border-radius: 4px;
             margin-top: 10px;
         }
-        button.solarized-button:hover {
-            background-color: #2aa198;
+        .solarized-button {
+            background-color: #268bd2;
         }
         .settings-link {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
             color: #268bd2;
             text-decoration: none;
-            display: block;
-            margin-top: 10px;
-        }
-        .settings-link:hover {
-            color: #2aa198;
         }
     </style>
 </head>
@@ -58,8 +57,6 @@
         <label for="platform">Platform</label>
         <select id="platform">
             <option value="Gemini">Gemini</option>
-            <option value="Cloudflare Worker AI">Cloudflare Worker AI</option>
-            <option value="OpenRouter">OpenRouter</option>
         </select>
 
         <label for="model">Model</label>
