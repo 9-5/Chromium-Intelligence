@@ -3,25 +3,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         showPopup(request.data);
     } else if (request.action === 'showPromptInput') {
         showPromptInput(request.fileUrl, request.fileType);
-    } else if (request.action === 'getTextSelection') {
-        (async () => {
-            try {
-                const settings = await getSettings();
-                chrome.runtime.sendMessage({
-                    action: 'processText',
-                    data: {
-                        selectedText: request.selectedText,
-                        aiAction: request.aiAction,
-                        apiKey: settings.geminiApiKey
-                    }
-                });
-                sendResponse({ success: true });
-            } catch (error) {
-                console.error("Error processing text:", error);
-                sendResponse({ success: false, error: error.message });
-            }
-        })();
-        return true;
     }
     return true;
 });
@@ -40,7 +21,7 @@ function showPopup(content) {
 
     const copyButton = document.getElementById('copyButton');
     copyButton.addEventListener('click', () => {
-        navigator.clipboard.writeText(content)
+        navigator.clipboard.writeText(document.getElementById('responseText').value)
             .then(() => {
                 console.log('Text copied to clipboard');
             })
@@ -56,63 +37,69 @@ function showPopup(content) {
 }
 
 function showPromptInput(fileUrl, fileType) {
-    const popup = document.createElement('div');
-    popup.id = 'ai-assistant-prompt-input';
-    popup.innerHTML = `
-        <textarea id="promptText" placeholder="Enter your prompt here"></textarea>
+    const promptInput = document.createElement('div');
+    promptInput.id = 'ai-assistant-prompt-input';
+    promptInput.innerHTML = `
+        <label for="promptText">Enter your prompt:</label>
+        <textarea id="promptText"></textarea>
         <div class="button-container">
-            <button id="processButton" class="solarized-button">Process</button>
-            <button id="closeButton" class="solarized-button">Close</button>
+            <button id="sendPromptButton" class="solarized-button">Send</button>
+            <button id="closePromptButton" class="solarized-button">Close</button>
         </div>
     `;
-    document.body.appendChild(popup);
+    document.body.appendChild(promptInput);
 
-    const processButton = document.getElementById('processButton');
-    processButton.addEventListener('click', async () => {
+    const sendPromptButton = document.getElementById('sendPromptButton');
+    sendPromptButton.addEventListener('click', () => {
         const promptText = document.getElementById('promptText').value;
-        if (promptText) {
-            try {
-                const { base64Content, mimeType } = await fetchAndConvertFile(fileUrl, fileType);
-                const settings = await getSettings();
+        processFile(fileUrl, fileType, promptText);
+        promptInput.remove();
+    });
+
+    const closePromptButton = document.getElementById('closePromptButton');
+    closePromptButton.addEventListener('click', () => {
+        promptInput.remove();
+    });
+}
+
+async function processFile(fileUrl, fileType, prompt) {
+    try {
+        if (fileType === 'pdf') {
+            const pdfBlob = await fetch(fileUrl).then(r => r.blob());
+            const { base64Content, mimeType } = await convertBlobToBase64(pdfBlob, 'application/pdf');
+             const settings = await getSettings();
                 chrome.runtime.sendMessage({
                     action: 'processImage',
                     data: {
                         base64Content: base64Content,
                         mimeType: mimeType,
-                        prompt: promptText,
+                        prompt: prompt,
                         apiKey: settings.geminiApiKey
                     }
+                }, response => {
+                    if (chrome.runtime.lastError) {
+                        console.error("Error in background script:", chrome.runtime.lastError.message);
+                    }
+                    if (response && response.data) {
+                        showPopup(response.data);
+                    } else if (response && response.error) {
+                         showPopup(response.error.message);
+                    } else {
+                        showPopup('No response received from background script.');
+                    }
                 });
-                popup.remove();
-            } catch (error) {
-                console.error("Error processing PDF:", error);
-                alert("Failed to process PDF. Please check the console for details.");
-            }
         } else {
-            alert("Please enter a prompt.");
+            console.log('Unsupported file type');
         }
-    });
-
-    const closeButton = document.getElementById('closeButton');
-    closeButton.addEventListener('click', () => {
-        popup.remove();
-    });
-}
-
-async function fetchAndConvertFile(fileUrl, fileType) {
-    try {
-        const response = await fetch(fileUrl);
-        const blob = await response.blob();
-        return await convertBlobToBase64(blob);
     } catch (error) {
-        throw new Error(`Failed to fetch file: ${error.message}`);
+        console.error("Error processing file:", error);
+        showPopup(`Error processing file: ${error.message}`);
     }
 }
 
-function convertBlobToBase64(blob) {
+async function convertBlobToBase64(blob, mimeType) {
     try {
         return new Promise((resolve, reject) => {
-            const mimeType = blob.type || 'application/octet-stream';
             const reader = new FileReader();
             reader.onloadend = () => {
                 const base64Content = reader.result.split(',')[1];
@@ -122,7 +109,7 @@ function convertBlobToBase64(blob) {
             reader.readAsDataURL(blob);
         });
     } catch (error) {
-        throw new Error(`Failed to convert blob to base64: ${error.message}`);
+        throw new Error(`Failed to fetch image: ${error.message}`);
     }
 }
 

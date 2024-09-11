@@ -3,7 +3,9 @@ const platformModels = {
         'gemini-1.5-pro',
         'gemini-1.5-flash',
         'gemini-1.5-flash-8b'
-    ]
+    ],
+    'Cloudflare Worker AI': [],
+    'OpenRouter': []
 };
 
 function populateModelDropdown(platform) {
@@ -22,32 +24,25 @@ function populateModelDropdown(platform) {
 
 function updateUI(items) {
     const platformSelect = document.getElementById('platform');
-    const modelSelect = document.getElementById('model');
-    const customModelInput = document.getElementById('custom-model');
-
+    
     if (items.platform) {
         platformSelect.value = items.platform;
         populateModelDropdown(items.platform);
     }
 
+    const modelSelect = document.getElementById('model');
     if (items.model) {
         modelSelect.value = items.model;
-    }
-
-    if (items.custom_model) {
-        customModelInput.value = items.custom_model;
     }
 }
 
 function saveSettings() {
     const platform = document.getElementById('platform').value;
     const model = document.getElementById('model').value;
-    const customModel = document.getElementById('custom-model').value;
 
     chrome.storage.sync.set({
-        platform: platform,
-        model: model,
-        custom_model: customModel
+        'platform': platform,
+        'model': model
     }, function() {
         console.log('Settings saved');
     });
@@ -62,7 +57,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const platformSelect = document.getElementById('platform');
     if (platformSelect) {
-        platformSelect.addEventListener('change', handlePlatformChange);
+        platformSelect.addEventListener('change', function() {
+            const platform = this.value;
+            populateModelDropdown(platform);
+        });
     }
 
     const saveButton = document.getElementById('save-popup-settings');
@@ -88,8 +86,3 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
         ], updateUI);
     }
 });
-
-function handlePlatformChange() {
-    const platform = document.getElementById('platform').value;
-    populateModelDropdown(platform);
-}
