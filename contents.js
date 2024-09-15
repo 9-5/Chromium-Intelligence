@@ -21,7 +21,7 @@ function showPopup(content) {
 
     const copyButton = document.getElementById('copyButton');
     copyButton.addEventListener('click', () => {
-        navigator.clipboard.writeText(document.getElementById('responseText').value)
+        navigator.clipboard.writeText(content)
             .then(() => {
                 console.log('Text copied to clipboard');
             })
@@ -36,69 +36,50 @@ function showPopup(content) {
     });
 }
 
-function showPromptInput(fileUrl, fileType) {
-    const promptInput = document.createElement('div');
-    promptInput.id = 'ai-assistant-prompt-input';
-    promptInput.innerHTML = `
-        <label for="promptText">Enter your prompt:</label>
-        <textarea id="promptText"></textarea>
+function showPromptInput(selectedText, fileType) {
+    const promptInputArea = document.createElement('div');
+    promptInputArea.id = 'ai-custom-prompt-input';
+    promptInputArea.innerHTML = `
+        <label for="customPrompt">Enter your custom prompt:</label>
+        <textarea id="customPrompt" placeholder="Enter prompt here"></textarea>
         <div class="button-container">
-            <button id="sendPromptButton" class="solarized-button">Send</button>
-            <button id="closePromptButton" class="solarized-button">Close</button>
+            <button id="sendPromptButton" class="solarized-button">Send Prompt</button>
+            <button id="cancelPromptButton" class="solarized-button">Cancel</button>
         </div>
     `;
-    document.body.appendChild(promptInput);
+    document.body.appendChild(promptInputArea);
 
     const sendPromptButton = document.getElementById('sendPromptButton');
     sendPromptButton.addEventListener('click', () => {
-        const promptText = document.getElementById('promptText').value;
-        processFile(fileUrl, fileType, promptText);
-        promptInput.remove();
+        const customPrompt = document.getElementById('customPrompt').value;
+        
+        chrome.runtime.sendMessage({
+            action: 'processCustomPrompt',
+            data: { selectedText: selectedText, customPrompt: customPrompt }
+        }, response => {
+            promptInputArea.remove();
+            if (response && response.data) {
+                showPopup(response.data);
+            } else if (response && response.error) {
+                showPopup(`Error: ${response.error.message}`);
+            } else {
+                showPopup('An error occurred.');
+            }
+        });
     });
 
-    const closePromptButton = document.getElementById('closePromptButton');
-    closePromptButton.addEventListener('click', () => {
-        promptInput.remove();
+    const cancelPromptButton = document.getElementById('cancelPromptButton');
+    cancelPromptButton.addEventListener('click', () => {
+        promptInputArea.remove();
     });
 }
 
-async function processFile(fileUrl, fileType, prompt) {
+async function getImageData(fileUrl) {
     try {
-        if (fileType === 'pdf') {
-            const pdfBlob = await fetch(fileUrl).then(r => r.blob());
-            const { base64Content, mimeType } = await convertBlobToBase64(pdfBlob, 'application/pdf');
-             const settings = await getSettings();
-                chrome.runtime.sendMessage({
-                    action: 'processImage',
-                    data: {
-                        base64Content: base64Content,
-                        mimeType: mimeType,
-                        prompt: prompt,
-                        apiKey: settings.geminiApiKey
-                    }
-                }, response => {
-                    if (chrome.runtime.lastError) {
-                        console.error("Error in background script:", chrome.runtime.lastError.message);
-                    }
-                    if (response && response.data) {
-                        showPopup(response.data);
-                    } else if (response && response.error) {
-                         showPopup(response.error.message);
-                    } else {
-                        showPopup('No response received from background script.');
-                    }
-                });
-        } else {
-            console.log('Unsupported file type');
-        }
-    } catch (error) {
-        console.error("Error processing file:", error);
-        showPopup(`Error processing file: ${error.message}`);
-    }
-}
+        const response = await fetch(fileUrl);
+        const blob = await response.blob();
+        const mimeType = blob.type;
 
-async function convertBlobToBase64(blob, mimeType) {
-    try {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onloadend = () => {

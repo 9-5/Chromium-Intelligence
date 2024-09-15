@@ -26,17 +26,16 @@
             <select id="model">
             </select>
 
-            <div>
+            <div class="input-group">
                 <label for="use-specific-model">Use Specific Model</label>
                 <input type="checkbox" id="use-specific-model">
             </div>
 
-            <label for="custom-model">Custom Model</label>
-            <input type="text" id="custom-model" disabled>
-
-            <button id="save-settings" class="solarized-button">Save Settings</button>
+            <div class="input-group">
+                <label for="custom-model">Custom Model</label>
+                <input type="text" id="custom-model" disabled>
+            </div>
         </div>
-
         <div id="api-keys-section" class="section" style="display: none;">
             <h2>API Keys</h2>
             <div class="input-group">
@@ -45,16 +44,14 @@
                 <i class="fas fa-eye toggle-visibility" id="toggle-gemini-api-key"></i>
                 <button id="test-gemini" class="solarized-button test-button">Test</button>
             </div>
-
             <div class="input-group">
                 <label for="openrouter-api-key">OpenRouter API Key</label>
                 <input type="password" id="openrouter-api-key">
                 <i class="fas fa-eye toggle-visibility" id="toggle-openrouter-api-key"></i>
                 <button id="test-openrouter" class="solarized-button test-button">Test</button>
             </div>
-            
             <div class="cloudflare-group">
-                <div class="input-group">
+                <div>
                     <label class="small-label" for="cloudflare-account-id">Account ID</label>
                     <input type="text" id="cloudflare-account-id">
                 </div>

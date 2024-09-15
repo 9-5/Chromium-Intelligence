@@ -7,236 +7,210 @@ const aiAssistantPrompts = {
         'Rewrite this:\n\n',
         'You are a writing assistant. Rewrite the text provided by the user to improve phrasing. Output ONLY the rewritten text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
     ],
-    'Make Friendly': [
-        'Rewrite this in a friendly tone:\n\n',
-        'You are a writing assistant. Rewrite the text provided by the user to make it sound more friendly and approachable. Output ONLY the rewritten text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
+    'Friendly Tone': [
+        'Make this sound friendly:\n\n',
+        'You are a text rewriting assistant. Rewrite the text provided by the user to have a friendly and approachable tone. Output ONLY the rewritten text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
     ],
-    'Make Professional': [
-        'Rewrite this in a professional tone:\n\n',
-        'You are a writing assistant. Rewrite the text provided by the user to make it sound more professional and formal. Output ONLY the rewritten text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
+    'Professional Tone': [
+        'Make this sound professional:\n\n',
+        'You are a text rewriting assistant. Rewrite the text provided by the user to have a professional and formal tone. Output ONLY the rewritten text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
     ],
-    'Make Concise': [
+    'Concise': [
         'Rewrite this concisely:\n\n',
-        'You are a writing assistant. Rewrite the text provided by the user to be more concise and to-the-point, removing unnecessary words. Output ONLY the rewritten text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
+        'You are a text rewriting assistant. Rewrite the text provided by the user to be concise and to the point, removing unnecessary words and phrases. Output ONLY the rewritten text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
     ],
     'Summarize': [
         'Summarize this:\n\n',
         'You are a summarization assistant. Summarize the text provided by the user. Output ONLY the summarized text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
+    ],
+    'Custom': [
+        '',
+        ''
     ]
 };
 
-const apiHandlers = {
-    gemini: {
-        processText: async (text, apiKey) => {
-            try {
-                const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
-                const response = await fetch(geminiApiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{ text: text }]
-                        }]
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                if (data.error) {
-                    throw new Error(data.error.message);
-                }
-                
-                if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content || !data.candidates[0].content.parts || data.candidates[0].content.parts.length === 0) {
-                    throw new Error('No candidates found in Gemini response.');
-                }
-                
-                return data.candidates[0].content.parts[0].text;
-            } catch (error) {
-                console.error("Gemini API error:", error);
-                throw error;
-            }
-        },
-        processImage: async (base64Content, mimeType, prompt, apiKey) => {
-            try {
-                const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-vision:generateContent?key=${apiKey}`;
-                const response = await fetch(geminiApiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [
-                                {
-                                    inline_data: {
-                                        mime_type: mimeType,
-                                        data: base64Content
-                                    }
-                                },
-                                {
-                                    text: prompt
-                                }
-                            ]
-                        }]
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-
-                if (data.error) {
-                    throw new Error(data.error.message);
-                }
-                
-                if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content || !data.candidates[0].content.parts || data.candidates[0].content.parts.length === 0) {
-                    throw new Error('No candidates found in Gemini response.');
-                }
-                
-                return data.candidates[0].content.parts[0].text;
-                
-            } catch (error) {
-                console.error("Gemini API error:", error);
-                throw error;
-            }
-        }
-    },
-    cloudflare: {
-        processText: async (text, accountId, apiKey, model = "@cf/meta/llama-2-7b-chat-int8") => {
-            const cloudflareUrl = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model}`;
-            try {
-                const response = await fetch(cloudflareUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${apiKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        messages: [
-                            {
-                                role: "user",
-                                content: text
-                            }
-                        ]
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                if (data.errors && data.errors.length > 0) {
-                    throw new Error(data.errors[0].message);
-                }
-
-                return data.result.response;
-            } catch (error) {
-                console.error("Cloudflare API error:", error);
-                throw error;
-            }
-        }
-    }
-};
-
-chrome.runtime.onInstalled.addListener(() => {
-    chrome.contextMenus.create({
-        id: 'ai-assistant',
-        title: 'AI Assistant',
-        contexts: ['selection', 'image', 'link']
-    });
-
-    for (const action in aiAssistantPrompts) {
-        chrome.contextMenus.create({
-            id: `ai-assistant-${action}`,
-            title: action,
-            parentId: 'ai-assistant',
-            contexts: ['selection']
-        });
-    }
-
-    chrome.contextMenus.create({
-        id: 'ai-assistant-image',
-        title: 'Describe This Image',
-        parentId: 'ai-assistant',
-        contexts: ['image']
-    });
-
-    chrome.contextMenus.create({
-        id: 'ai-assistant-pdf',
-        title: 'Analyze PDF',
-        parentId: 'ai-assistant',
-        contexts: ['link'],
-        documentUrlPatterns: ["*://*/*.pdf"]
-    });
+chrome.contextMenus.create({
+    id: 'ai-assistant',
+    title: 'AI Assistant',
+    contexts: ['selection', 'image', 'link']
 });
 
-chrome.contextMenus.onClicked.addListener((data, tab) => {
-    if (data.menuItemId.startsWith('ai-assistant-')) {
-        const action = data.menuItemId.split('ai-assistant-')[1];
-         chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            function: getTextSelection,
-            args: [action]
-        });
-    } else if (data.menuItemId === 'ai-assistant-image') {
-         chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            function: getImageDetails,
-        });
-    } else if (data.menuItemId === 'ai-assistant-pdf') {
+chrome.contextMenus.create({
+    parentId: 'ai-assistant',
+    id: 'ai-proofread',
+    title: 'Proofread',
+    contexts: ['selection']
+});
+
+chrome.contextMenus.create({
+    parentId: 'ai-assistant',
+    id: 'ai-rewrite',
+    title: 'Rewrite',
+    contexts: ['selection']
+});
+
+chrome.contextMenus.create({
+    parentId: 'ai-assistant',
+    id: 'ai-friendly-tone',
+    title: 'Friendly Tone',
+    contexts: ['selection']
+});
+
+chrome.contextMenus.create({
+    parentId: 'ai-assistant',
+    id: 'ai-professional-tone',
+    title: 'Professional Tone',
+    contexts: ['selection']
+});
+
+chrome.contextMenus.create({
+    parentId: 'ai-assistant',
+    id: 'ai-concise',
+    title: 'Concise',
+    contexts: ['selection']
+});
+
+chrome.contextMenus.create({
+    parentId: 'ai-assistant',
+    id: 'ai-summarize',
+    title: 'Summarize',
+    contexts: ['selection']
+});
+
+chrome.contextMenus.create({
+    parentId: 'ai-assistant',
+    id: 'ai-custom',
+    title: 'Custom Prompt...',
+    contexts: ['selection']
+});
+
+chrome.contextMenus.onClicked.addListener(function(info, tab) {
+    const selectedText = info.selectionText;
+    if (info.menuItemId === 'ai-proofread') {
+        processText(selectedText, 'Proofread', tab);
+    } else if (info.menuItemId === 'ai-rewrite') {
+        processText(selectedText, 'Rewrite', tab);
+    } else if (info.menuItemId === 'ai-friendly-tone') {
+        processText(selectedText, 'Friendly Tone', tab);
+    } else if (info.menuItemId === 'ai-professional-tone') {
+        processText(selectedText, 'Professional Tone', tab);
+    } else if (info.menuItemId === 'ai-concise') {
+        processText(selectedText, 'Concise', tab);
+    } else if (info.menuItemId === 'ai-summarize') {
+        processText(selectedText, 'Summarize', tab);
+    } else if (info.menuItemId === 'ai-custom') {
         chrome.scripting.executeScript({
             target: { tabId: tab.id },
-            function: getPdfDetails,
-            args: [data.linkUrl]
+            function: showPromptInput,
+            args: [selectedText, 'text']
         });
     }
 });
 
-function getTextSelection(aiAction) {
-    const selectedText = window.getSelection().toString();
-    if (selectedText) {
-        chrome.runtime.sendMessage({
-            action: 'getTextSelection',
-            data: {
-                selectedText: selectedText,
-                aiAction: aiAction
+async function processText(selectedText, operation, tab) {
+    try {
+        const settings = await getSettings();
+        const { platform, model, use_specific_model, custom_model, geminiApiKey, openrouterApiKey, cloudflareId, cloudflareApiKey } = settings;
+        let apiKey = '';
+
+        if (platform === 'Gemini') {
+            apiKey = geminiApiKey;
+        } else if (platform === 'OpenRouter') {
+            apiKey = openrouterApiKey;
+        } else if (platform === 'Cloudflare Worker AI') {
+            apiKey = cloudflareApiKey;
+        }
+
+        if (!apiKey && platform !== 'Cloudflare Worker AI') {
+            chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                function: showPopup,
+                args: ['Please set your API key in the extension options.']
+            });
+            return;
+        }
+        
+        if (operation !== 'Custom') {
+            const prompt = aiAssistantPrompts[operation][0] + selectedText;
+            const context = aiAssistantPrompts[operation][1];
+
+            let response = null;
+            if (platform === 'Gemini') {
+                response = await apiHandlers.gemini.processText(prompt, context, apiKey, model);
+            } else if (platform === 'OpenRouter') {
+                response = await apiHandlers.openrouter.processText(prompt, context, apiKey, model);
+            } else if (platform === 'Cloudflare Worker AI') {
+                response = await apiHandlers.cloudflare.processText(prompt, context, cloudflareId, cloudflareApiKey, model);
             }
+
+            if (response) {
+                chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    function: showPopup,
+                    args: [response]
+                });
+            } else {
+                chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    function: showPopup,
+                    args: ['An error occurred while processing your request.']
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Error processing text:', error);
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            function: showPopup,
+            args: [`Error: ${error.message}`]
         });
     }
-}
-
-function getImageDetails() {
-    const imageUrl = document.querySelector('img:hover').src;
-    chrome.runtime.sendMessage({ action: 'processImageFromUrl', data: { imageUrl } });
-}
-
-function getPdfDetails(fileUrl) {
-    chrome.runtime.sendMessage({ action: 'showPromptInput', fileUrl: fileUrl, fileType: 'pdf' });
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'processText') {
+    if (request.action === 'processCustomPrompt') {
         (async () => {
             try {
-                const { selectedText, aiAction, apiKey } = request.data;
-                const [promptPrefix, promptInstructions] = aiAssistantPrompts[aiAction];
-                const fullPrompt = promptPrefix + selectedText + '\n\n' + promptInstructions;
-                const response = await apiHandlers.gemini.processText(fullPrompt, apiKey);
-                sendResponse({ data: response });
+                const { selectedText, customPrompt } = request.data;
+                const settings = await getSettings();
+                const { platform, model, use_specific_model, custom_model, geminiApiKey, openrouterApiKey, cloudflareId, cloudflareApiKey } = settings;
+                let apiKey = '';
+
+                if (platform === 'Gemini') {
+                    apiKey = geminiApiKey;
+                } else if (platform === 'OpenRouter') {
+                    apiKey = openrouterApiKey;
+                } else if (platform === 'Cloudflare Worker AI') {
+                    apiKey = cloudflareApiKey;
+                }
+
+                if (!apiKey && platform !== 'Cloudflare Worker AI') {
+                    sendResponse({ data: 'Please set your API key in the extension options.' });
+                    return;
+                }
+
+                const prompt = customPrompt + '\n\n' + selectedText;
+                const context = 'You are an AI assistant.';
+
+                let response = null;
+                if (platform === 'Gemini') {
+                    response = await apiHandlers.gemini.processText(prompt, context, apiKey, model);
+                } else if (platform === 'OpenRouter') {
+                    response = await apiHandlers.openrouter.processText(prompt, context, apiKey, model);
+                } else if (platform === 'Cloudflare Worker AI') {
+                    response = await apiHandlers.cloudflare.processText(prompt, context, cloudflareId, cloudflareApiKey, model);
+                }
+
+                if (response) {
+                    sendResponse({ data: response });
+                } else {
+                    sendResponse({ data: 'An error occurred while processing your request.' });
+                }
             } catch (error) {
-                console.error('Error in background script:', error);
+                console.error('Error processing custom prompt:', error);
                 sendResponse({ error: { message: error.message, details: error.toString() } });
             }
         })();
-        
         return true;
     }
     if (request.action === 'processImage') {

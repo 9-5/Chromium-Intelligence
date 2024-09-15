@@ -20,8 +20,9 @@ A powerful Chromium extension that leverages the multiple AI APIs to assist with
   - Professional Tone Conversion
   - Concise Rewrites
   - Text Summarization
-  - Sentiment Analysis [Coming Soon!]
-  - Language Translation [Coming Soon! Expects excessive use at this point!]
+  - Custom Prompt
+
+*Note: Cloudflare Workers AI support is limited at this point!*
 
 ## Privacy Notice
 

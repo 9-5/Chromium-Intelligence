@@ -34,6 +34,8 @@ function updateUI(items) {
     if (items.model) {
         modelSelect.value = items.model;
     }
+
+    const customModelInput = document.getElementById('custom-model');
 }
 
 function saveSettings() {
@@ -41,8 +43,8 @@ function saveSettings() {
     const model = document.getElementById('model').value;
 
     chrome.storage.sync.set({
-        'platform': platform,
-        'model': model
+        platform: platform,
+        model: model
     }, function() {
         console.log('Settings saved');
     });
@@ -58,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const platformSelect = document.getElementById('platform');
     if (platformSelect) {
         platformSelect.addEventListener('change', function() {
-            const platform = this.value;
+           const platform = this.value;
             populateModelDropdown(platform);
         });
     }
