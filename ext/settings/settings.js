@@ -4,7 +4,9 @@ const platformModels = {
         'gemini-1.5-flash',
         'gemini-1.5-flash-8b'
     ],
-    'Cloudflare Worker AI': [],
+    'Cloudflare Worker AI': [
+        '@cf/meta/llama-2-7b-chat-int8'
+    ],
     'OpenRouter': []
 };
 
@@ -24,60 +26,46 @@ function populateModelDropdown(platform) {
         });
     }
     
-    customModelInput.disabled = !useSpecificModel.checked;
-    modelSelect.disabled = useSpecificModel.checked;
+    if (platform === 'OpenRouter') {
+        useSpecificModel.disabled = false;
+        customModelInput.disabled = !useSpecificModel.checked;
+    } else {
+        useSpecificModel.disabled = true;
+        customModelInput.disabled = true;
+    }
 }
 
 function updateUI(items) {
     const platformSelect = document.getElementById('platform');
+    if (platformSelect) {
+        platformSelect.value = items.platform || 'Gemini';
+        populateModelDropdown(platformSelect.value);
+    }
+
     const modelSelect = document.getElementById('model');
+     if (modelSelect) {
+        modelSelect.value = items.model || 'gemini-1.5-pro';
+    }
+    
+    const useSpecificModelCheckbox = document.getElementById('use-specific-model');
+    if (useSpecificModelCheckbox) {
+        useSpecificModelCheckbox.checked = items.use_specific_model || false;
+    }
+
     const customModelInput = document.getElementById('custom-model');
-    const useSpecificModel = document.getElementById('use-specific-model');
-
-    if (items.platform) {
-        platformSelect.value = items.platform;
-        populateModelDropdown(items.platform);
+    if (customModelInput) {
+        customModelInput.value = items.custom_model || '';
+        customModelInput.disabled = !(items.use_specific_model || false);
     }
 
-    if (items.model) {
-        modelSelect.value = items.model;
+    const geminiApiKeyInput = document.getElementById('gemini-api-key');
+    if (geminiApiKeyInput) {
+        geminiApiKeyInput.value = items.geminiApiKey || '';
     }
 
-    if (items['use_specific_model'] !== undefined) {
-        useSpecificModel.checked = items['use_specific_model'];
+    const openrouterApiKeyInput = document.getElementById('openrouter-api-key');
+    if (openrouterApiKeyInput) {
+        openrouterApiKeyInput.value = items.openrouterApiKey || '';
     }
 
-    if (items['custom_model']) {
-        customModelInput.value = items['custom_model'];
-    }
-
-    customModelInput.disabled = !useSpecificModel.checked;
-    modelSelect.disabled = useSpecificModel.checked;
-}
-
-function saveSettings() {
-    const platform = document.getElementById('platform').value;
-    const model = document.getElementById('model').value;
-    const useSpecificModel = document.getElementById('use-specific-model').checked;
-    const customModel = document.getElementById('custom-model').value;
-
-    chrome.storage.sync.set({
-        'platform': platform,
-        'model': model,
-        'use_specific_model': useSpecificModel,
-        'custom_model': customModel
-    }, function() {
-        showNotification('Settings saved successfully!', 'success');
-    });
-}
-
-function saveApiKeys() {
-    const geminiApiKey = document.getElementById('gemini-api-key').value;
-    const openrouterApiKey = document.getElementById('openrouter-api-key').value;
-    const cloudflareAccountId = document.getElementById('cloudflare-account-id').value;
-    const cloudflareApiKey = document.getElementById('cloudflare-api-key').value;
-
-    chrome.storage.sync.set({
-        'geminiApiKey': geminiApiKey,
-        'openrouterApiKey': openrouterApiKey,
-        'cloudflareId': cloudflareAccountId,
+    const cloudflareAccountIdInput = document.getElementById('cloudflare-account-

@@ -21,13 +21,9 @@ function showPopup(content) {
 
     const copyButton = document.getElementById('copyButton');
     copyButton.addEventListener('click', () => {
-        navigator.clipboard.writeText(content)
-            .then(() => {
-                console.log('Text copied to clipboard');
-            })
-            .catch(err => {
-                console.error('Failed to copy text: ', err);
-            });
+        const responseText = document.getElementById('responseText');
+        responseText.select();
+        document.execCommand('copy');
     });
 
     const closeButton = document.getElementById('closeButton');
@@ -36,47 +32,60 @@ function showPopup(content) {
     });
 }
 
-function showPromptInput(selectedText, fileType) {
-    const promptInputArea = document.createElement('div');
-    promptInputArea.id = 'ai-custom-prompt-input';
-    promptInputArea.innerHTML = `
-        <label for="customPrompt">Enter your custom prompt:</label>
-        <textarea id="customPrompt" placeholder="Enter prompt here"></textarea>
+function showPromptInput(fileUrl, fileType) {
+    const promptInput = document.createElement('div');
+    promptInput.id = 'ai-assistant-prompt-input';
+    promptInput.innerHTML = `
+        <textarea id="promptText" placeholder="Enter your prompt here"></textarea>
         <div class="button-container">
-            <button id="sendPromptButton" class="solarized-button">Send Prompt</button>
-            <button id="cancelPromptButton" class="solarized-button">Cancel</button>
+            <button id="sendButton" class="solarized-button">Send</button>
+            <button id="cancelButton" class="solarized-button">Cancel</button>
         </div>
     `;
-    document.body.appendChild(promptInputArea);
+    document.body.appendChild(promptInput);
 
-    const sendPromptButton = document.getElementById('sendPromptButton');
-    sendPromptButton.addEventListener('click', () => {
-        const customPrompt = document.getElementById('customPrompt').value;
-        
-        chrome.runtime.sendMessage({
-            action: 'processCustomPrompt',
-            data: { selectedText: selectedText, customPrompt: customPrompt }
-        }, response => {
-            promptInputArea.remove();
-            if (response && response.data) {
-                showPopup(response.data);
-            } else if (response && response.error) {
-                showPopup(`Error: ${response.error.message}`);
-            } else {
-                showPopup('An error occurred.');
-            }
-        });
+    const sendButton = document.getElementById('sendButton');
+    sendButton.addEventListener('click', async () => {
+        const promptText = document.getElementById('promptText').value;
+        promptInput.remove();
+        try {
+            const { base64Content, mimeType } = await getImageData(fileUrl);
+            const settings = await getSettings();
+
+            chrome.runtime.sendMessage({
+                action: 'processImage',
+                data: {
+                    base64Content: base64Content,
+                    mimeType: mimeType,
+                    prompt: promptText,
+                    apiKey: settings.geminiApiKey
+                }
+            }, response => {
+                if (response && response.data) {
+                    showPopup(response.data);
+                } else if (response && response.error) {
+                    showPopup(`Error: ${response.error.message}`);
+                } else {
+                    showPopup('An unexpected error occurred.');
+                }
+            });
+        } catch (error) {
+            showPopup(`Error: ${error.message}`);
+        }
     });
 
-    const cancelPromptButton = document.getElementById('cancelPromptButton');
-    cancelPromptButton.addEventListener('click', () => {
-        promptInputArea.remove();
+    const cancelButton = document.getElementById('cancelButton');
+    cancelButton.addEventListener('click', () => {
+        promptInput.remove();
     });
 }
 
 async function getImageData(fileUrl) {
     try {
         const response = await fetch(fileUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const blob = await response.blob();
         const mimeType = blob.type;
 

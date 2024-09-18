@@ -22,7 +22,7 @@ A powerful Chromium extension that leverages the multiple AI APIs to assist with
   - Text Summarization
   - Custom Prompt
 
-*Note: Cloudflare Workers AI support is limited at this point!*
+*Stay tuned; more features are being added at this point!*
 
 ## Privacy Notice
 
