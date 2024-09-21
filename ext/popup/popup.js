@@ -4,9 +4,6 @@ const platformModels = {
         'gemini-1.5-flash',
         'gemini-1.5-flash-8b'
     ],
-    'Cloudflare Worker AI': [
-        '@cf/meta/llama-2-7b-chat-int8'
-    ],
     'OpenRouter': []
 };
 
@@ -34,54 +31,15 @@ function updateUI(items) {
 
     const modelSelect = document.getElementById('model');
     if (modelSelect) {
-        modelSelect.value = items.model || 'gemini-1.5-pro';
+        modelSelect.value = items.model || '';
+    }
+
+    const customModelInput = document.getElementById('custom-model');
+    if (customModelInput) {
+        customModelInput.value = items.custom_model || '';
+        customModelInput.disabled = true; // Always disable, custom model is not applicable in this version.
     }
 }
 
 function saveSettings() {
-    const platform = document.getElementById('platform').value;
-    const model = document.getElementById('model').value;
-    chrome.storage.sync.set({
-        'platform': platform,
-        'model': model
-    }, function() {
-        console.log('Settings saved');
-    });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    chrome.storage.sync.get([
-        'platform',
-        'model'
-    ], updateUI);
-
-    const platformSelect = document.getElementById('platform');
-    if (platformSelect) {
-        platformSelect.addEventListener('change', function() {
-            const platform = this.value;
-            populateModelDropdown(platform);
-        });
-    }
-
-    const saveButton = document.getElementById('save-popup-settings');
-    if (saveButton) {
-        saveButton.addEventListener('click', saveSettings);
-    }
-
-    const settingsLink = document.getElementById('settings-link');
-    if (settingsLink) {
-        settingsLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            chrome.runtime.openOptionsPage();
-        });
-    }
-});
-
-chrome.storage.onChanged.addListener(function(changes, namespace) {
-    if (namespace === 'sync') {
-        chrome.storage.sync.get([
-            'platform',
-            'model'
-        ], updateUI);
-    }
-});
+    const platform = document.getElementById('

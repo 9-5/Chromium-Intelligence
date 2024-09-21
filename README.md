@@ -7,7 +7,6 @@ A powerful Chromium extension that leverages the multiple AI APIs to assist with
 ## Supported Platforms
 
 - [Google Gemini](https://ai.google.dev/gemini-api/docs/models/gemini)
-- [Cloudflare AI Workers](https://developers.cloudflare.com/workers-ai/models/)
 - [OpenRouter AI](https://openrouter.ai/)
 
 ## Features
@@ -20,9 +19,17 @@ A powerful Chromium extension that leverages the multiple AI APIs to assist with
   - Professional Tone Conversion
   - Concise Rewrites
   - Text Summarization
-  - Custom Prompt
-
-*Stay tuned; more features are being added at this point!*
+  - Language Translation
+  - Sentiment Analysis
+  - Keyword Extraction
+  - Question Answering (PDF)
+  - Free-form Prompts
+- **Image Analysis**: Analyze selected images with detailed descriptions
+- **PDF Processing**: Extract text and perform question answering from PDF files
+- **Cross-Platform Support**: Seamlessly switch between Google Gemini and OpenRouter AI
+- **Customizable Prompts**: Tailor AI behavior using custom prompts for various operations
+- **API Key Storage**: Securely store your API keys within the extension's settings
+- **Privacy Focused**: Your data is processed locally and securely, respecting your privacy at this point!*
 
 ## Privacy Notice
 
@@ -46,5 +53,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
-- Built using Google's Gemini, Cloudflare Workers AI, and OpenRouter APIs
+- Built using Google's Gemini and OpenRouter APIs
 - Inspired by Apple Intelligence

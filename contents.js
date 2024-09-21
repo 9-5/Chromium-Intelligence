@@ -22,8 +22,13 @@ function showPopup(content) {
     const copyButton = document.getElementById('copyButton');
     copyButton.addEventListener('click', () => {
         const responseText = document.getElementById('responseText');
-        responseText.select();
-        document.execCommand('copy');
+        navigator.clipboard.writeText(responseText.value)
+            .then(() => {
+                console.log('Text copied to clipboard');
+            })
+            .catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
     });
 
     const closeButton = document.getElementById('closeButton');
@@ -33,59 +38,68 @@ function showPopup(content) {
 }
 
 function showPromptInput(fileUrl, fileType) {
-    const promptInput = document.createElement('div');
-    promptInput.id = 'ai-assistant-prompt-input';
-    promptInput.innerHTML = `
-        <textarea id="promptText" placeholder="Enter your prompt here"></textarea>
+    const promptBox = document.createElement('div');
+    promptBox.id = 'ai-assistant-prompt-box';
+    promptBox.innerHTML = `
+        <label for="promptInput">Enter your prompt for the PDF:</label>
+        <input type="text" id="promptInput" name="promptInput">
         <div class="button-container">
-            <button id="sendButton" class="solarized-button">Send</button>
+            <button id="processButton" class="solarized-button">Process PDF</button>
             <button id="cancelButton" class="solarized-button">Cancel</button>
         </div>
     `;
-    document.body.appendChild(promptInput);
+    document.body.appendChild(promptBox);
 
-    const sendButton = document.getElementById('sendButton');
-    sendButton.addEventListener('click', async () => {
-        const promptText = document.getElementById('promptText').value;
-        promptInput.remove();
-        try {
-            const { base64Content, mimeType } = await getImageData(fileUrl);
-            const settings = await getSettings();
+    const processButton = document.getElementById('processButton');
+    processButton.addEventListener('click', () => {
+        const prompt = document.getElementById('promptInput').value;
+        promptBox.remove();
 
+        getSettings().then(settings => {
+            const { platform, model, use_specific_model, custom_model, geminiApiKey, openrouterApiKey } = settings;
             chrome.runtime.sendMessage({
-                action: 'processImage',
+                action: 'processPdf',
                 data: {
-                    base64Content: base64Content,
-                    mimeType: mimeType,
-                    prompt: promptText,
-                    apiKey: settings.geminiApiKey
+                    fileUrl: fileUrl,
+                    prompt: prompt,
+                    apiKey: platform === 'Gemini' ? geminiApiKey : openrouterApiKey,
+                    platform: platform,
+                    model: model,
+                    use_specific_model: use_specific_model,
+                    custom_model: custom_model
                 }
-            }, response => {
-                if (response && response.data) {
+            }, (response) => {
+                if (response.data) {
                     showPopup(response.data);
-                } else if (response && response.error) {
+                } else if (response.error) {
                     showPopup(`Error: ${response.error.message}`);
-                } else {
-                    showPopup('An unexpected error occurred.');
                 }
             });
-        } catch (error) {
-            showPopup(`Error: ${error.message}`);
-        }
+        });
     });
 
     const cancelButton = document.getElementById('cancelButton');
     cancelButton.addEventListener('click', () => {
-        promptInput.remove();
+        promptBox.remove();
     });
+
+    function getSettings() {
+        return new Promise((resolve) => {
+            chrome.storage.sync.get([
+                'platform',
+                'model',
+                'use_specific_model',
+                'custom_model',
+                'geminiApiKey',
+                'openrouterApiKey'
+            ], resolve);
+        });
+    }
 }
 
-async function getImageData(fileUrl) {
+async function getImageData(imageUrl) {
     try {
-        const response = await fetch(fileUrl);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        const response = await fetch(imageUrl);
         const blob = await response.blob();
         const mimeType = blob.type;
 
@@ -111,9 +125,7 @@ function getSettings() {
             'use_specific_model',
             'custom_model',
             'geminiApiKey',
-            'openrouterApiKey',
-            'cloudflareId',
-            'cloudflareApiKey'
+            'openrouterApiKey'
         ], resolve);
     });
 }
