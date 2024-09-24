@@ -4,6 +4,7 @@ const platformModels = {
         'gemini-1.5-flash',
         'gemini-1.5-flash-8b'
     ],
+    'Cloudflare Worker AI': [],
     'OpenRouter': []
 };
 
@@ -42,4 +43,5 @@ function updateUI(items) {
 }
 
 function saveSettings() {
-    const platform = document.getElementById('
+    const platform = document.getElementById('platform').value;
+    const model = document.getElementById('model').value;

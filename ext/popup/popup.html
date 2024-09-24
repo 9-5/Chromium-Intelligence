@@ -30,25 +30,42 @@
             display: block;
             margin-bottom: 5px;
         }
-        button.solarized-button {
+        button {
             background-color: #268bd2;
             color: white;
-            padding: 8px 12px;
+            padding: 10px 15px;
             border: none;
-            cursor: pointer;
             border-radius: 5px;
-            margin-top: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
-        button.solarized-button:hover {
+        button:hover {
             background-color: #2aa198;
         }
-        .settings-link {
-            color: #268bd2;
-            text-decoration: none;
+        .solarized-button {
+            background-color: #268bd2;
+            color: #fdf6e3;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .solarized-button:hover {
+            background-color: #2aa198;
+        }
+
+         .settings-link {
             display: block;
             margin-top: 10px;
+            color: #268bd2;
+            text-decoration: none;
+            transition: color 0.3s;
         }
-        .settings-link:hover {
+
+         .settings-link:hover {
             color: #2aa198;
         }
     </style>
@@ -58,6 +75,7 @@
         <label for="platform">Platform</label>
         <select id="platform">
             <option value="Gemini">Gemini</option>
+            <option value="Cloudflare Worker AI">Cloudflare Worker AI</option>
             <option value="OpenRouter">OpenRouter</option>
         </select>
 
