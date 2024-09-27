@@ -25,23 +25,29 @@ function populateModelDropdown(platform) {
 function updateUI(items) {
     const platformSelect = document.getElementById('platform');
     
-    if (platformSelect) {
-        platformSelect.value = items.platform || 'Gemini';
-        populateModelDropdown(platformSelect.value);
+... (FILE CONTENT TRUNCATED) ... platformSelect.addEventListener('change', handlePlatformChange);
     }
 
-    const modelSelect = document.getElementById('model');
-    if (modelSelect) {
-        modelSelect.value = items.model || '';
+    const saveButton = document.getElementById('save-popup-settings');
+    if (saveButton) {
+        saveButton.addEventListener('click', saveSettings);
     }
 
-    const customModelInput = document.getElementById('custom-model');
-    if (customModelInput) {
-        customModelInput.value = items.custom_model || '';
-        customModelInput.disabled = true; // Always disable, custom model is not applicable in this version.
+    const settingsLink = document.getElementById('settings-link');
+    if (settingsLink) {
+        settingsLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            chrome.runtime.openOptionsPage();
+        });
     }
-}
+});
 
-function saveSettings() {
-    const platform = document.getElementById('platform').value;
-    const model = document.getElementById('model').value;
+chrome.storage.onChanged.addListener(function(changes, namespace) {
+    if (namespace === 'sync') {
+        chrome.storage.sync.get([
+            'platform',
+            'model',
+            'custom_model'
+        ], updateUI);
+    }
+});
