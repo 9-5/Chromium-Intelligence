@@ -25,7 +25,41 @@ function populateModelDropdown(platform) {
 function updateUI(items) {
     const platformSelect = document.getElementById('platform');
     
-... (FILE CONTENT TRUNCATED) ... platformSelect.addEventListener('change', handlePlatformChange);
+    if (platformSelect) {
+        platformSelect.value = items.platform || 'Gemini';
+        populateModelDropdown(items.platform || 'Gemini');
+    }
+
+    const modelSelect = document.getElementById('model');
+    if (modelSelect) {
+        modelSelect.value = items.model || 'gemini-1.5-pro';
+    }
+
+    const customModelInput = document.getElementById('custom-model');
+}
+
+function saveSettings() {
+    const platform = document.getElementById('platform').value;
+    const model = document.getElementById('model').value;
+
+    chrome.storage.sync.set({
+        platform: platform,
+        model: model,
+    }, function() {
+        console.log('Settings saved');
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    chrome.storage.sync.get([
+        'platform',
+        'model',
+        'custom_model'
+    ], updateUI);
+
+    const platformSelect = document.getElementById('platform');
+    if (platformSelect) {
+        platformSelect.addEventListener('change', handlePlatformChange);
     }
 
     const saveButton = document.getElementById('save-popup-settings');
