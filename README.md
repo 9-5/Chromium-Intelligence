@@ -20,8 +20,7 @@ A powerful Chromium extension that leverages the multiple AI APIs to assist with
   - Professional Tone Conversion
   - Concise Rewrites
   - Text Summarization
-  - and more coming soon!
-- **Image Analysis**: Describe the image by right-clicking and selecting "Analyze Image" at this point!]
+  - ... [More to come at this point!]
 
 ## Privacy Notice
 

@@ -32,10 +32,8 @@ function updateUI(items) {
 
     const modelSelect = document.getElementById('model');
     if (modelSelect) {
-        modelSelect.value = items.model || 'gemini-1.5-pro';
+        modelSelect.value = items.model || platformModels['Gemini'][0];
     }
-
-    const customModelInput = document.getElementById('custom-model');
 }
 
 function saveSettings() {
@@ -44,7 +42,7 @@ function saveSettings() {
 
     chrome.storage.sync.set({
         platform: platform,
-        model: model,
+        model: model
     }, function() {
         console.log('Settings saved');
     });
@@ -75,6 +73,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+function handlePlatformChange() {
+    const platform = document.getElementById('platform').value;
+    populateModelDropdown(platform);
+}
 
 chrome.storage.onChanged.addListener(function(changes, namespace) {
     if (namespace === 'sync') {

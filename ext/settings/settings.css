@@ -48,61 +48,59 @@ body {
     margin-top: 10px;
 }
 
-.section {
+h2 {
+    color: #268bd2;
     margin-bottom: 20px;
 }
 label {
     display: block;
     margin-bottom: 5px;
+    color: #eee8d5;
 }
-input[type="text"],
-input[type="password"],
-select {
+select, input[type="text"], input[type="password"] {
     width: 100%;
     padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #268bd2;
+    margin-bottom: 15px;
+    border: 1px solid #586e75;
     background-color: #073642;
     color: #839496;
     border-radius: 4px;
+    box-sizing: border-box;
 }
 button {
+    background-color: #268bd2;
+    color: #fdf6e3;
     padding: 10px 15px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 14px;
+    transition: background-color 0.3s ease;
 }
-.solarized-button {
-    background-color: #268bd2;
-    color: #fdf6e3;
-}
-.solarized-button:hover {
+button:hover {
     background-color: #2aa198;
 }
 .input-group {
     position: relative;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
-
+.input-group label {
+    margin-bottom: 5px;
+}
 .input-group input {
-    padding-right: 30px; /* Make space for the icon */
+    padding-right: 30px; /* Space for the eye icon */
 }
-
 .input-group i {
     position: absolute;
     top: 50%;
     right: 10px;
     transform: translateY(-50%);
     cursor: pointer;
-    color: #839496;
+    color: #586e75;
 }
 
 .small-label {
     font-size: 0.8em;
     color: #93a1a1;
-    margin-bottom: 3px;
-    display: block;
 }
 
 .popup-notification {
@@ -110,15 +108,23 @@ button {
     top: 20px;
     right: 20px;
     background-color: #073642;
-    color: #839496;
-    padding: 15px;
+    color: #fdf6e3;
+    padding: 10px 20px;
     border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     display: flex;
     align-items: center;
     gap: 10px;
     animation: slideIn 0.3s ease-out forwards;
+}
+
+.popup-notification.success {
+    border-left: 5px solid #2aa198;
+}
+
+.popup-notification.error {
+    border-left: 5px solid #dc322f;
 }
 
 .popup-notification.success i {

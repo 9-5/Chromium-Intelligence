@@ -7,254 +7,275 @@ const aiAssistantPrompts = {
         'Rewrite this:\n\n',
         'You are a writing assistant. Rewrite the text provided by the user to improve phrasing. Output ONLY the rewritten text provided without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
     ],
-    'Make Friendly': [
+    'Friendly Tone': [
         'Make this sound more friendly:\n\n',
-        'You are a writing assistant. Make the text provided by the user sound more friendly. Output ONLY the rewritten text provided without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
+        'You are a writing assistant. Rewrite the text provided by the user to make it sound more friendly. Output ONLY the rewritten text provided without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
     ],
-    'Make Professional': [
+    'Professional Tone': [
         'Make this sound more professional:\n\n',
-        'You are a writing assistant. Make the text provided by the user sound more professional. Output ONLY the rewritten text provided without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
+        'You are a writing assistant. Rewrite the text provided by the user to make it sound more professional. Output ONLY the rewritten text provided without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
     ],
-    'Make Concise': [
-        'Make this more concise:\n\n',
+    'Concise Rewrite': [
+        'Rewrite this concisely:\n\n',
         'You are a writing assistant. Rewrite the text provided by the user to be more concise. Output ONLY the rewritten text provided without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
     ],
     'Summarize': [
         'Summarize this:\n\n',
-        'You are a summarization assistant. Summarize the text provided by the user. Output ONLY the summarized text provided without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
-    ],
-    'Analyze Image': [
-        'Describe this image in detail:\n\n',
-        'You are an AI model capable of describing images in detail. Analyze the image provided and give a detailed description. Output ONLY the detailed image description without additional comments. Respond in the same language as the input (e.g., English US, French). If the image is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_IMAGE_INCOMPATIBLE_WITH_REQUEST".'
+        'You are a summarization assistant. Summarize the text provided by the user. Output ONLY the summarized text without any additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
     ]
 };
 
-const apiHandlers = {
-    gemini: {
-        processText: async (text, prompt, apiKey, model) => {
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{ text: prompt + text }]
-                        }],
-                        generationConfig: {
-                            temperature: 0.7,
-                        },
-                    }),
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const data = await response.json();
-
-                if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content || !data.candidates[0].content.parts || data.candidates[0].content.parts.length === 0) {
-                    throw new Error('No valid candidates found in the response.');
-                }
-
-                return data.candidates[0].content.parts[0].text;
-            } catch (error) {
-                console.error('Error calling Gemini API:', error);
-                throw error;
-            }
-        },
-        processImage: async (base64Content, mimeType, prompt, apiKey) => {
-            try {
-                const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-vision:generateContent?key=${apiKey}`;
-
-                const requestOptions = {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [
-                                {
-                                    text: prompt
-                                },
-                                {
-                                    inline_data: {
-                                        mime_type: mimeType,
-                                        data: base64Content
-                                    }
-                                }
-                            ]
-                        }]
-                    })
-                };
-
-                const response = await fetch(geminiApiUrl, requestOptions);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const data = await response.json();
-
-                if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content || !data.candidates[0].content.parts || data.candidates[0].content.parts.length === 0) {
-                    throw new Error('No valid candidates found in the response.');
-                }
-
-                return data.candidates[0].content.parts[0].text;
-
-            } catch (error) {
-                console.error("Gemini API call failed:", error);
-                throw error;
-            }
-        }
-    },
-    cloudflare: {
-        processText: async (text, prompt, accountId, apiKey, model) => {
-            try {
-                const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model}`;
-                const headers = {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json'
-                };
-                const body = JSON.stringify({
-                    prompt: prompt + text
-                });
-
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: headers,
-                    body: body
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const data = await response.json();
-
-                if (data && data.result && data.result.response) {
-                    return data.result.response;
-                } else {
-                    throw new Error('Unexpected response format from Cloudflare API.');
-                }
-            } catch (error) {
-                console.error('Error calling Cloudflare API:', error);
-                throw error;
-            }
-        }
-    },
-    openrouter: {
-        processText: async (text, prompt, apiKey, model) => {
-            try {
-                const response = await fetch("https://api.openrouter.ai/api/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${apiKey}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        model: model,
-                        messages: [
-                            {
-                                role: "user",
-                                content: prompt + text
-                            }
-                        ],
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const data = await response.json();
-
-                if (data && data.choices && data.choices.length > 0 && data.choices[0].message && data.choices[0].message.content) {
-                    return data.choices[0].message.content;
-                } else {
-                    throw new Error("Unexpected response format from OpenRouter API.");
-                }
-            } catch (error) {
-                console.error('Error calling OpenRouter API:', error);
-                throw error;
-            }
-        }
-    }
-};
-
-chrome.contextMenus.create({
-    id: "ai-assistant-context-menu",
-    title: "AI Assistant: %s",
-    contexts: ["selection", "image", "link"]
-});
-
-chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-    if (info.menuItemId === "ai-assistant-context-menu") {
-        let selectedText = info.selectionText;
-        let imgSrcUrl = info.srcUrl;
-        let linkUrl = info.linkUrl;
-
-        if (selectedText) {
-            chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                function: showPromptInput,
-                args: [selectedText, 'text']
-            });
-        } else if (imgSrcUrl) {
-            chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                function: showPromptInput,
-                args: [imgSrcUrl, 'image']
-            });
-        } else if (linkUrl) {
-            chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                function: showPromptInput,
-                args: [linkUrl, 'link']
-            });
-        }
-    }
-});
-
-function showPromptInput(data, type) {
-    // Send a message to content.js to show the prompt input
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, { action: 'showPromptInput', fileUrl: data, fileType: type });
+chrome.runtime.onInstalled.addListener(() => {
+    chrome.contextMenus.create({
+        id: "ai-assistant-context-menu",
+        title: "AI Assistant",
+        contexts: ["selection", "image", "link"]
     });
+
+    for (const key in aiAssistantPrompts) {
+        chrome.contextMenus.create({
+            id: `ai-assistant-${key}`,
+            parentId: "ai-assistant-context-menu",
+            title: key,
+            contexts: ["selection"]
+        });
+    }
+
+    chrome.contextMenus.create({
+        id: "ai-assistant-describe-image",
+        parentId: "ai-assistant-context-menu",
+        title: "Describe Image",
+        contexts: ["image"]
+    });
+
+    chrome.contextMenus.create({
+        id: "ai-assistant-describe-pdf",
+        parentId: "ai-assistant-context-menu",
+        title: "Describe PDF",
+        contexts: ["link"],
+        documentUrlPatterns: ["*://*.pdf"]
+    });
+});
+
+chrome.contextMenus.onClicked.addListener((data, tab) => {
+    if (data.menuItemId === "ai-assistant-describe-image") {
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            function: getImageDetails,
+            args: [data.srcUrl]
+        });
+    } else if (data.menuItemId === "ai-assistant-describe-pdf") {
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            function: getPDFDetails,
+            args: [data.linkUrl]
+        });
+    } else {
+        let promptKey = data.menuItemId.replace("ai-assistant-", "");
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            function: useAI,
+            args: [data.selectionText, aiAssistantPrompts[promptKey][0], aiAssistantPrompts[promptKey][1]]
+        });
+    }
+});
+
+async function getImageDetails(imageUrl) {
+    try {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const base64Content = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+        const mimeType = blob.type;
+        chrome.runtime.sendMessage({ action: 'processImage', data: { base64Content, mimeType } });
+    } catch (error) {
+        console.error('Error fetching image:', error);
+    }
+}
+
+async function getPDFDetails(fileUrl) {
+    chrome.runtime.sendMessage({ action: 'showPromptInput', fileUrl: fileUrl, fileType: 'pdf' });
+}
+
+function useAI(selectedText, prePrompt, prompt) {
+    chrome.runtime.sendMessage({ action: 'showPopup', data: { selectedText, prePrompt, prompt } });
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'processText') {
+    if (request.action === 'generateText') {
         (async () => {
             try {
-                const { selectedText, prompt, platform, model, custom_model, geminiApiKey, openrouterApiKey, cloudflareId, cloudflareApiKey, use_specific_model } = request.data;
-                let responseText = "";
-                let usedModel = model;
-
-                if (use_specific_model && custom_model) {
-                    usedModel = custom_model;
-                }
-
-                switch (platform) {
-                    case 'Gemini':
-                        responseText = await apiHandlers.gemini.processText(selectedText, prompt, geminiApiKey, usedModel);
-                        break;
-                    case 'Cloudflare Worker AI':
-                        responseText = await apiHandlers.cloudflare.processText(selectedText, prompt, cloudflareId, cloudflareApiKey, usedModel);
-                        break;
-                    case 'OpenRouter':
-                        responseText = await apiHandlers.openrouter.processText(selectedText, prompt, openrouterApiKey, usedModel);
-                        break;
-                    default:
-                        responseText = "ERROR_PLATFORM_NOT_SUPPORTED";
-                }
-
-                chrome.scripting.executeScript({
-                    target: { tabId: sender.tab.id },
-                    function: showPopup,
-                    args: [responseText]
+                const { selectedText, prePrompt, prompt, apiKey } = request.data;
+                const settings = await new Promise((resolve) => {
+                    chrome.storage.sync.get([
+                        'platform',
+                        'model',
+                        'use_specific_model',
+                        'custom_model'
+                    ], resolve);
                 });
+                const { platform, model, use_specific_model, custom_model } = settings;
+
+                let chosenModel = model;
+                if (use_specific_model && custom_model) {
+                    chosenModel = custom_model;
+                }
+
+                let apiHandlers = {
+                    'Gemini': {
+                        'generateText': async (prompt, apiKey) => {
+                            const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${chosenModel}:generateContent?key=${apiKey}`;
+                            const geminiPayload = {
+                                "contents": [{
+                                    "parts": [{ "text": prompt + selectedText }]
+                                }]
+                            };
+
+                            const geminiResponse = await fetch(geminiApiUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(geminiPayload)
+                            });
+
+                            if (!geminiResponse.ok) {
+                                throw new Error(`Gemini API error! Status: ${geminiResponse.status}`);
+                            }
+
+                            const geminiData = await geminiResponse.json();
+
+                            if (geminiData.candidates && geminiData.candidates.length > 0) {
+                                return geminiData.candidates[0].content.parts[0].text;
+                            } else {
+                                throw new Error('No candidates found in Gemini API response.');
+                            }
+                        },
+                        'processImage': async (base64Content, mimeType, prompt, apiKey) => {
+                            const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-vision:generateContent?key=${apiKey}`;
+                            const geminiPayload = {
+                                "contents": [{
+                                    "parts": [
+                                        { "text": prompt },
+                                        {
+                                            "inline_data": {
+                                                "mime_type": mimeType,
+                                                "data": base64Content
+                                            }
+                                        }
+                                    ]
+                                }]
+                            };
+
+                            const geminiResponse = await fetch(geminiApiUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(geminiPayload)
+                            });
+
+                            if (!geminiResponse.ok) {
+                                throw new Error(`Gemini API error! Status: ${geminiResponse.status}`);
+                            }
+
+                            const geminiData = await geminiResponse.json();
+
+                            if (geminiData.candidates && geminiData.candidates.length > 0) {
+                                return geminiData.candidates[0].content.parts[0].text;
+                            } else {
+                                throw new Error('No candidates found in Gemini API response.');
+                            }
+                        }
+                    },
+                    'Cloudflare Worker AI': {
+                        'generateText': async (prompt, apiKey, accountId, model) => {
+                            const cfApiUrl = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model}`;
+
+                            const cfPayload = {
+                                "messages": [
+                                    { "role": "user", "content": prompt + selectedText }
+                                ]
+                            };
+
+                            const cfResponse = await fetch(cfApiUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${apiKey}`
+                                },
+                                body: JSON.stringify(cfPayload)
+                            });
+
+                            if (!cfResponse.ok) {
+                                throw new Error(`Cloudflare API error! Status: ${cfResponse.status}`);
+                            }
+
+                            const cfData = await cfResponse.json();
+
+                            if (cfData.result && cfData.result.response) {
+                                return cfData.result.response;
+                            } else {
+                                throw new Error('No response found in Cloudflare API response.');
+                            }
+                        }
+                    },
+                    'OpenRouter': {
+                        'generateText': async (prompt, apiKey) => {
+                            const openRouterApiUrl = 'https://api.openrouter.ai/api/v1/chat/completions';
+
+                            const openRouterPayload = {
+                                "model": chosenModel,
+                                "messages": [{ "role": "user", "content": prompt + selectedText }],
+                                "max_tokens": 2048,
+                            };
+
+                            const openRouterResponse = await fetch(openRouterApiUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${apiKey}`,
+                                    'HTTP-Referer': 'https://chromium-intelligence.com',
+                                    'X-Title': 'Chromium-Intelligence'
+                                },
+                                body: JSON.stringify(openRouterPayload)
+                            });
+
+                            if (!openRouterResponse.ok) {
+                                throw new Error(`OpenRouter API error! Status: ${openRouterResponse.status}`);
+                            }
+
+                            const openRouterData = await openRouterResponse.json();
+
+                            if (openRouterData.choices && openRouterData.choices.length > 0) {
+                                return openRouterData.choices[0].message.content;
+                            } else {
+                                throw new Error('No choices found in OpenRouter API response.');
+                            }
+                        }
+                    }
+                };
+
+                let response = null;
+
+                if (platform === 'Gemini') {
+                    response = await apiHandlers[platform].generateText(prePrompt + selectedText, apiKey);
+                } else if (platform === 'Cloudflare Worker AI') {
+                    const cloudflareId = await new Promise((resolve) => {
+                        chrome.storage.sync.get(['cloudflareId'], (result) => {
+                            resolve(result.cloudflareId);
+                        });
+                    });
+                    response = await apiHandlers[platform].generateText(prePrompt, apiKey, cloudflareId, chosenModel);
+                } else if (platform === 'OpenRouter') {
+                    response = await apiHandlers[platform].generateText(prePrompt, apiKey);
+                }
+
+                sendResponse({ data: response });
             } catch (error) {
                 console.error('Error in background script:', error);
                 sendResponse({ error: { message: error.message, details: error.toString() } });
