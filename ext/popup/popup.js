@@ -24,7 +24,6 @@ function populateModelDropdown(platform) {
 
 function updateUI(items) {
     const platformSelect = document.getElementById('platform');
-    
     if (platformSelect) {
         platformSelect.value = items.platform || 'Gemini';
         populateModelDropdown(items.platform || 'Gemini');
@@ -32,7 +31,7 @@ function updateUI(items) {
 
     const modelSelect = document.getElementById('model');
     if (modelSelect) {
-        modelSelect.value = items.model || platformModels['Gemini'][0];
+        modelSelect.value = items.model || platformModels[items.platform][0] || '';
     }
 }
 
