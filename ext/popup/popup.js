@@ -22,37 +22,44 @@ function populateModelDropdown(platform) {
     }
 }
 
-function updateUI(items) {
+async function updateUI() {
+    const items = await chrome.storage.sync.get([
+        'platform',
+        'model',
+        'custom_model'
+    ]);
+
     const platformSelect = document.getElementById('platform');
     if (platformSelect) {
         platformSelect.value = items.platform || 'Gemini';
-        populateModelDropdown(items.platform || 'Gemini');
+        populateModelDropdown(platformSelect.value);
     }
 
     const modelSelect = document.getElementById('model');
     if (modelSelect) {
-        modelSelect.value = items.model || platformModels[items.platform][0] || '';
+        modelSelect.value = items.model || platformModels[items.platform || 'Gemini'][0] || '';
+    }
+
+    const customModelInput = document.getElementById('custom-model');
+    if (customModelInput) {
+        customModelInput.value = items.custom_model || '';
     }
 }
 
-function saveSettings() {
+async function saveSettings() {
     const platform = document.getElementById('platform').value;
     const model = document.getElementById('model').value;
+    const customModel = document.getElementById('custom-model').value;
 
-    chrome.storage.sync.set({
+    await chrome.storage.sync.set({
         platform: platform,
-        model: model
-    }, function() {
-        console.log('Settings saved');
+        model: model,
+        custom_model: customModel
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    chrome.storage.sync.get([
-        'platform',
-        'model',
-        'custom_model'
-    ], updateUI);
+document.addEventListener('DOMContentLoaded', async function () {
+    await updateUI();
 
     const platformSelect = document.getElementById('platform');
     if (platformSelect) {
@@ -80,10 +87,6 @@ function handlePlatformChange() {
 
 chrome.storage.onChanged.addListener(function(changes, namespace) {
     if (namespace === 'sync') {
-        chrome.storage.sync.get([
-            'platform',
-            'model',
-            'custom_model'
-        ], updateUI);
+        updateUI();
     }
 });
