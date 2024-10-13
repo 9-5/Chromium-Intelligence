@@ -16,9 +16,46 @@
         <div id="settings-section" class="section settings-section">
             <h2>AI Settings</h2>
             <label for="platform">Platform</label>
-            <select id="platf
-... (FILE CONTENT TRUNCATED) ...
-  <div class="input-group">
+            <select id="platform">
+                <option value="Gemini">Gemini</option>
+                <option value="Cloudflare Worker AI">Cloudflare Worker AI</option>
+                <option value="OpenRouter">OpenRouter</option>
+            </select>
+
+            <label for="model">Model</label>
+            <select id="model">
+            </select>
+
+            <label for="custom-model">Custom Model</label>
+            <input type="text" id="custom-model" disabled>
+        </div>
+        <div id="api-keys-section" class="section" style="display: none;">
+            <h2>API Keys</h2>
+            <div class="gemini-group">
+                <h3>Gemini</h3>
+                <div class="input-group">
+                    <label class="small-label" for="gemini-api-key">API Key</label>
+                    <input type="password" id="gemini-api-key">
+                    <i class="fas fa-eye toggle-visibility" id="toggle-gemini-api-key"></i>
+                </div>
+                <button id="test-gemini" class="solarized-button test-button">Test</button>
+            </div>
+            <div class="openrouter-group">
+                <h3>OpenRouter</h3>
+                <div class="input-group">
+                    <label class="small-label" for="openrouter-api-key">API Key</label>
+                    <input type="password" id="openrouter-api-key">
+                    <i class="fas fa-eye toggle-visibility" id="toggle-openrouter-api-key"></i>
+                </div>
+                <button id="test-openrouter" class="solarized-button test-button">Test</button>
+            </div>
+            <div class="cloudflare-group">
+                <h3>Cloudflare</h3>
+                <div class="input-group">
+                    <label class="small-label" for="cloudflare-id">Account ID</label>
+                    <input type="text" id="cloudflare-id">
+                </div>
+                <div class="input-group">
                     <label class="small-label" for="cloudflare-api-key">API Key</label>
                     <input type="password" id="cloudflare-api-key">
                     <i class="fas fa-eye toggle-visibility" id="toggle-cloudflare-api-key"></i>

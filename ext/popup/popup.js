@@ -22,53 +22,51 @@ function populateModelDropdown(platform) {
     }
 }
 
-async function updateUI() {
-    const items = await chrome.storage.sync.get([
-        'platform',
-        'model',
-        'custom_model'
-    ]);
-
+function updateUI(options) {
     const platformSelect = document.getElementById('platform');
-    if (platformSelect) {
-        platformSelect.value = items.platform || 'Gemini';
-        populateModelDropdown(platformSelect.value);
-    }
-
     const modelSelect = document.getElementById('model');
-    if (modelSelect) {
-        modelSelect.value = items.model || platformModels[items.platform || 'Gemini'][0] || '';
-    }
-
     const customModelInput = document.getElementById('custom-model');
+
+    if (platformSelect) {
+        platformSelect.value = options.platform || 'Gemini';
+        populateModelDropdown(options.platform || 'Gemini');
+    }
+
+    if (modelSelect) {
+        modelSelect.value = options.model || platformModels[options.platform || 'Gemini'][0];
+    }
+
     if (customModelInput) {
-        customModelInput.value = items.custom_model || '';
+        customModelInput.value = options.customModel || '';
     }
 }
 
-async function saveSettings() {
-    const platform = document.getElementById('platform').value;
-    const model = document.getElementById('model').value;
-    const customModel = document.getElementById('custom-model').value;
-
-    await chrome.storage.sync.set({
-        platform: platform,
-        model: model,
-        custom_model: customModel
+document.addEventListener('DOMContentLoaded', function() {
+    chrome.storage.sync.get(null, (options) => {
+        updateUI(options);
     });
-}
-
-document.addEventListener('DOMContentLoaded', async function () {
-    await updateUI();
 
     const platformSelect = document.getElementById('platform');
     if (platformSelect) {
-        platformSelect.addEventListener('change', handlePlatformChange);
+        platformSelect.addEventListener('change', () => {
+            const platform = platformSelect.value;
+            populateModelDropdown(platform);
+        });
     }
 
     const saveButton = document.getElementById('save-popup-settings');
     if (saveButton) {
-        saveButton.addEventListener('click', saveSettings);
+        saveButton.addEventListener('click', () => {
+            const platform = document.getElementById('platform').value;
+            const model = document.getElementById('model').value;
+            const customModel = document.getElementById('custom-model').value;
+            
+            chrome.storage.sync.set({
+                platform: platform,
+                model: model,
+                customModel: customModel
+            });
+        });
     }
 
     const settingsLink = document.getElementById('settings-link');
@@ -80,13 +78,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 });
 
-function handlePlatformChange() {
-    const platform = document.getElementById('platform').value;
-    populateModelDropdown(platform);
-}
-
 chrome.storage.onChanged.addListener(function(changes, namespace) {
     if (namespace === 'sync') {
-        updateUI();
+        chrome.storage.sync.get(null, updateUI);
     }
 });
