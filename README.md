@@ -20,40 +20,7 @@ A powerful Chromium extension that leverages the multiple AI APIs to assist with
   - Professional Tone Conversion
   - Concise Rewrites
   - Text Summarization
-  - Sentiment Analysis [Coming Soon!]
-  - Translate to [Coming Soon!]
-
-## Installation
-
-1. Clone the repository
-2. Open Chrome and navigate to `chrome://extensions/`
-3. Enable "Developer mode" in the top right corner
-4. Click "Load unpacked" and select the extension directory
-
-## Usage
-
-1.  Install the extension from the Chrome Web Store [Coming Soon!]
-2.  Open the extension popup to configure your desired AI platform and API key
-3.  Right-click on any text, image, or PDF link to access the available AI operations.
-4.  For image analysis, right-click the image and select "Analyze Image with AI".
-
-**Note**: API keys are required to use the AI platforms. Get your API keys from the respective platform websites and paste it in the options page.
-
-## Configuration
-
-Configure the extension via the options page:
-- Choose your prefered platform (Gemini, Cloudflare AI, OpenRouter)
-- Enter API keys
-- Choose a default model
-
-## Supported Text Operations at this point!
-
-- Proofreading [Useful to correct any grammar or spelling mistakes]
-- Rewriting [Useful to re-phrase any text]
-- Friendly Tone Conversion [Useful to convert any text into a friendly tone]
-- Professional Tone Conversion [Useful to convert any text into a professional tone]
-- Concise Rewrites [Useful to shorten any text]
-- Text Summarization [Useful to get the gist of any text]
+  - Sentiment Analysis [Coming Soon at this point!]
 
 ## Privacy Notice
 
