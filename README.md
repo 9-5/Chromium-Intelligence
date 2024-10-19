@@ -20,7 +20,34 @@ A powerful Chromium extension that leverages the multiple AI APIs to assist with
   - Professional Tone Conversion
   - Concise Rewrites
   - Text Summarization
-  - Sentiment Analysis [Coming Soon at this point!]
+  - Sentiment Analysis [coming soon at this point!]
+
+## PDF Processing
+- Process and understand PDF content through user prompts. [coming soon at this point!]
+
+## Image Understanding
+- Extract valuable insights from images using AI vision models. [coming soon at this point!]
+
+## Installation
+
+1. Clone the repository
+2. Open Chrome and navigate to `chrome://extensions/`
+3. Enable "Developer mode"
+4. Click "Load unpacked" and select the extension directory
+
+## Usage
+
+1.  Install the extension
+2.  Right click on some text, image, or PDF link
+3.  Choose an option from the context menu to perform an AI operation on the content. [More platforms and operations coming at this point!]
+
+## API Key Setup
+
+You will need to provide your own API keys for the AI platforms you want to use. You can enter these keys in the extension's settings page.
+
+- **Gemini API**: Get your API key [here](https://ai.google.dev/tutorials/setup)
+- **Cloudflare Workers AI**: Refer to the [documentation](https://developers.cloudflare.com/workers-ai/) for setup instructions.
+- **OpenRouter AI**: Get your API key [here](https://openrouter.ai/keys)
 
 ## Privacy Notice
 

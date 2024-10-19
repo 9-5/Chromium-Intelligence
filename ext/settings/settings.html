@@ -22,53 +22,42 @@
                 <option value="OpenRouter">OpenRouter</option>
             </select>
 
-            <label for="use-specific-model">Use Specific Model</label>
-            <input type="checkbox" id="use-specific-model">
-
             <label for="model">Model</label>
             <select id="model">
             </select>
 
-            <label for="custom-model">Custom Model</label>
-            <input type="text" id="custom-model" disabled>
+            <label for="use-specific-model">
+                <input type="checkbox" id="use-specific-model"> Use Specific Model
+            </label>
+
+            <div class="input-group">
+                <label for="custom-model">Custom Model</label>
+                <input type="text" id="custom-model" disabled>
+            </div>
 
             <button id="save-settings" class="solarized-button">Save Settings</button>
         </div>
         <div id="api-keys-section" class="section" style="display: none;">
             <h2>API Keys</h2>
-            <div class="input-group">
-                <label for="gemini-api-key">Gemini API Key</label>
-                <input type="password" id="gemini-api-key">
-                <i class="fas fa-eye toggle-visibility" id="toggle-gemini-api-key"></i>
-            </div>
-            <button id="test-gemini" class="solarized-button test-button">Test</button>
-
-            <div class="input-group">
-                <label for="openrouter-api-key">OpenRouter API Key</label>
-                <input type="password" id="openrouter-api-key">
-                <i class="fas fa-eye toggle-visibility" id="toggle-openrouter-api-key"></i>
-            </div>
-            <button id="test-openrouter" class="solarized-button test-button">Test</button>
-
-            <div class="cloudflare-group">
+            <div class="api-key-group">
+                <h3>Gemini API</h3>
                 <div class="input-group">
-                    <label class="small-label" for="cloudflare-id">Account ID</label>
-                    <input type="text" id="cloudflare-id">
+                    <label class="small-label" for="gemini-api-key">API Key</label>
+                    <input type="password" id="gemini-api-key">
+                    <i class="fas fa-eye toggle-visibility" id="toggle-gemini-api-key"></i>
                 </div>
-                <div class="input-group">
-                    <label class="small-label" for="cloudflare-api-key">API Key</label>
-                    <input type="password" id="cloudflare-api-key">
-                    <i class="fas fa-eye toggle-visibility" id="toggle-cloudflare-api-key"></i>
-                </div>
-                <button id="test-cloudflare" class="solarized-button test-button">Test</button>
+                <button id="test-gemini" class="solarized-button test-button">Test</button>
             </div>
-            <button id="save-api-keys" class="solarized-button">Save API Keys</button>
-        </div>
-        <div id="about-section" class="section" style="display: none;">
-            <h2>About</h2>
-            <p>Developed by John Le, 0KB.ORG.</p>
-        </div>
-    </div>
-    <script src="settings.js"></script>
-</body>
-</html>
+
+            <div class="api-key-group">
+                <h3>OpenRouter API</h3>
+                <div class="input-group">
+                    <label class="small-label" for="openrouter-api-key">API Key</label>
+                    <input type="password" id="openrouter-api-key">
+                    <i class="fas fa-eye toggle-visibility" id="toggle-openrouter-api-key"></i>
+                </div>
+                 <button id="test-openrouter" class="solarized-button test-button">Test</button>
+            </div>
+
+            <div class="api-key-group cloudflare-group">
+                <div>
