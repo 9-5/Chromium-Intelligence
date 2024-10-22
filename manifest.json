@@ -1,12 +1,16 @@
 {
     "manifest_version": 3,
-    "name": "AI Writing Assistant",
+    "name": "Chromium Intelligence",
     "version": "1.0",
     "description": "A Chrome extension that assists with text rewriting, summarization, and more.",
     "permissions": [
         "contextMenus",
         "storage",
-        "activeTab"
+        "activeTab",
+        "scripting"
+    ],
+    "host_permissions": [
+        "https://generativelanguage.googleapis.com/*"
     ],
     "background": {
         "service_worker": "background.js"
