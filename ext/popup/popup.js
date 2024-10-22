@@ -24,26 +24,34 @@ function populateModelDropdown(platform) {
 
 function updateUI(items) {
     const platformSelect = document.getElementById('platform');
-    
-    if (platformSelect) {
-        platformSelect.value = items.platform || 'Gemini';
-        populateModelDropdown(items.platform || 'Gemini');
-    }
-
     const modelSelect = document.getElementById('model');
-    if (modelSelect) {
-        modelSelect.value = items.model || platformModels['Gemini'][0];
+    const customModelInput = document.getElementById('custom-model');
+
+    if (items.platform) {
+        platformSelect.value = items.platform;
+        populateModelDropdown(items.platform);
     }
 
-    const customModelInput = document.getElementById('custom-model');
+    if (items.model) {
+        modelSelect.value = items.model;
+    }
+
+    if (items['custom_model']) {
+        customModelInput.value = items['custom_model'];
+    }
 }
 
 function saveSettings() {
     const platform = document.getElementById('platform').value;
     const model = document.getElementById('model').value;
+    const customModel = document.getElementById('custom-model').value;
+    const useSpecificModel = document.getElementById('use-specific-model').checked;
+
     chrome.storage.sync.set({
         platform: platform,
-        model: model
+        model: model,
+        custom_model: customModel,
+        use_specific_model: useSpecificModel
     }, function() {
         console.log('Settings saved');
     });

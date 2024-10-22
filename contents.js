@@ -38,72 +38,68 @@ function showPopup(content) {
 }
 
 function showPromptInput(fileUrl, fileType) {
-    const promptInput = document.createElement('div');
-    promptInput.id = 'ai-assistant-prompt-input';
-    promptInput.innerHTML = `
-        <label for="promptText">Enter your prompt:</label>
-        <textarea id="promptText"></textarea>
+    const promptInputArea = document.createElement('div');
+    promptInputArea.id = 'ai-assistant-prompt-input';
+    promptInputArea.innerHTML = `
+        <label for="promptInput">Enter your prompt for the ${fileType} file:</label>
+        <input type="text" id="promptInput" placeholder="e.g., Summarize this document">
         <div class="button-container">
             <button id="processButton" class="solarized-button">Process</button>
             <button id="cancelButton" class="solarized-button">Cancel</button>
         </div>
     `;
-    document.body.appendChild(promptInput);
+    document.body.appendChild(promptInputArea);
 
     const processButton = document.getElementById('processButton');
     processButton.addEventListener('click', () => {
-        const promptText = document.getElementById('promptText').value;
-        processFile(fileUrl, fileType, promptText);
-        promptInput.remove();
+        const prompt = document.getElementById('promptInput').value;
+        promptInputArea.remove();
+        processFile(fileUrl, fileType, prompt);
     });
 
     const cancelButton = document.getElementById('cancelButton');
     cancelButton.addEventListener('click', () => {
-        promptInput.remove();
+        promptInputArea.remove();
     });
 }
 
 async function processFile(fileUrl, fileType, prompt) {
     try {
-        let content;
-        if (fileType === 'image') {
-            content = await getImageContent(fileUrl);
-            const { base64Content, mimeType } = content;
-            const settings = await getSettings();
-            const { platform, geminiApiKey } = settings;
-            chrome.runtime.sendMessage({
-                action: 'processImage',
-                data: {
-                    base64Content,
-                    mimeType,
-                    prompt,
-                    apiKey: geminiApiKey
-                }
-            }, response => {
-                if (response && response.data) {
-                    showPopup(response.data);
-                } else if (response && response.error) {
-                    alert(`Error: ${response.error.message}`);
-                }
-            });
-        } else {
-            console.log("Unsupported file type");
-            alert("Unsupported file type");
+        const settings = await getSettings();
+        const { platform, model, use_specific_model, custom_model, geminiApiKey, openrouterApiKey, cloudflareId, cloudflareApiKey } = settings;
+        let responseText;
+
+        if (fileType === 'pdf') {
+            responseText = "PDF Processing is in progress."
+             chrome.runtime.sendMessage({ action: 'showPopup', data: responseText });
         }
+
+        if (fileType === 'image') {
+            responseText = "Image Processing is in progress."
+            chrome.runtime.sendMessage({ action: 'showPopup', data: responseText });
+        }
+
     } catch (error) {
         console.error("Error processing file:", error);
-        alert(`Error processing file: ${error.message}`);
+        chrome.runtime.sendMessage({ action: 'showPopup', data: `Error: ${error.message}` });
     }
 }
 
-async function getImageContent(imageUrl) {
+async function fetchImageAsBase64(imageUrl) {
     try {
         const response = await fetch(imageUrl);
         const blob = await response.blob();
-        const mimeType = blob.type;
-
         return new Promise((resolve, reject) => {
-            const reader = new FileReader();
+           const mimeType = blob.type;
+           console.log("MIME Type:", mimeType);
+       
+           // Proceed with FileReader only for valid image types
+           if (!mimeType.startsWith('image/')) {
+               reject(new Error(`Invalid image MIME type: ${mimeType}`));
+               return;
+           }
+       
+           const reader = new FileReader();
             reader.onloadend = () => {
                 const base64Content = reader.result.split(',')[1];
                 resolve({ base64Content, mimeType });

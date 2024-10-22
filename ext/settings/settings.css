@@ -45,7 +45,7 @@ body {
 }
 
 .cloudflare-group .test-button {
-    margin-top: 10px;
+    margin-left: 10px;
 }
 
 .input-group {
@@ -55,61 +55,61 @@ body {
 .input-group label {
     display: block;
     margin-bottom: 5px;
-    color: #839496;
 }
 
 .input-group input {
-    width: 95%;
+    width: 100%;
     padding: 8px;
+    border: 1px solid #268bd2;
     background-color: #073642;
     color: #839496;
-    border: 1px solid #268bd2;
     border-radius: 4px;
 }
 
-.input-group input:disabled {
-    background-color: #002b36;
-    border-color: #586e75;
-}
-
-.input-group .small-label {
-    font-size: 0.8em;
-    color: #586e75;
-}
-
 .section {
-    margin-bottom: 20px;
+    display: none;
 }
 
 select {
     width: 100%;
     padding: 8px;
     margin-bottom: 15px;
+    border: 1px solid #268bd2;
     background-color: #073642;
     color: #839496;
-    border: 1px solid #268bd2;
     border-radius: 4px;
 }
 
-button {
-    padding: 10px 15px;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    border-radius: 5px;
-    margin-top: 10px;
+h2, h3 {
+    color: #268bd2;
+    margin-bottom: 10px;
 }
 
 .solarized-button {
-    background-color: #268bd2;
+    background-color: #073642;
+    color: #839496;
+    border: 1px solid #268bd2;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
-.test-button {
-    background-color: #2aa198;
+.solarized-button:hover {
+    background-color: #268bd2;
+    color: #002b36;
 }
 
 .api-key-group {
     margin-bottom: 20px;
+    border: 1px solid #073642;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.small-label {
+    font-size: 0.9em;
+    color: #586e75;
 }
 
 .toggle-visibility {
@@ -126,20 +126,13 @@ button {
     color: #839496;
     padding: 15px;
     border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     display: flex;
     align-items: center;
     gap: 10px;
     animation: slideIn 0.3s ease-out forwards;
-}
-
-.popup-notification.success {
-    border-left: 5px solid #2aa198;
-}
-
-.popup-notification.error {
-    border-left: 5px solid #dc322f;
+    border: 1px solid #268bd2;
 }
 
 .popup-notification.success i {
