@@ -20,7 +20,7 @@ A powerful Chromium extension that leverages the multiple AI APIs to assist with
   - Professional Tone Conversion
   - Concise Rewrites
   - Text Summarization
-  - Language Translation [In progress, requires API Key at this point!]
+  - Custom Prompts [NOW AVAILABLE at this point!]
 
 ## Privacy Notice
 
