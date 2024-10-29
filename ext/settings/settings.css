@@ -45,9 +45,85 @@ body {
 }
 
 .cloudflare-group .test-button {
-  
-... (FILE CONTENT TRUNCATED) ...
-ss i {
+    margin-top: 10px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+input[type="text"],
+input[type="password"],
+textarea,
+select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    background-color: #073642;
+    color: #839496;
+    border: 1px solid #268bd2;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+button.solarized-button {
+    background-color: #268bd2;
+    color: #fdf6e3;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+button.solarized-button:hover {
+    background-color: #2aa198;
+}
+.section {
+    margin-bottom: 20px;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.input-group input {
+    padding-right: 30px; /* Make space for the icon */
+}
+
+.toggle-visibility {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #839496;
+}
+
+.popup-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #073642;
+    color: #839496;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out forwards;
+}
+
+.popup-notification.success {
+    border-left: 5px solid #2aa198;
+}
+
+.popup-notification.error {
+    border-left: 5px solid #dc322f;
+}
+
+.popup-notification.success i {
     color: #2aa198;
 }
 

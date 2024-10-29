@@ -3,9 +3,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         showPopup(request.data);
     } else if (request.action === 'showPromptInput') {
         showPromptInput(request.fileUrl, request.fileType);
-    } else if (request.action === 'getCustomPrompt') {
-        getCustomPrompt(sendResponse);
-        return true;
     }
     return true;
 });
@@ -20,15 +17,86 @@ function showPopup(content) {
             <button id="closeButton" class="solarized-button">Close</button>
         </div>
     `;
-    document.body.appendC
-... (FILE CONTENT TRUNCATED) ...
+    document.body.appendChild(popup);
+
+    const copyButton = document.getElementById('copyButton');
+    copyButton.addEventListener('click', () => {
+        const responseText = document.getElementById('responseText');
+        responseText.select();
+        document.execCommand('copy');
+    });
+
+    const closeButton = document.getElementById('closeButton');
+    closeButton.addEventListener('click', () => {
+        popup.remove();
+    });
+}
+
+function showPromptInput(fileUrl, fileType) {
+    let prompt = prompt("Enter your prompt:");
+
+    if (prompt) {
+        if (fileType === 'text') {
+            processText(fileUrl, prompt);
+        } else if (fileType === 'image') {
+            processImage(fileUrl, prompt);
+        }
     }
 }
 
-function getCustomPrompt(sendResponse) {
-    chrome.storage.sync.get(['customPrompt'], (result) => {
-        sendResponse({ customPrompt: result.customPrompt || '' });
+async function processText(text, prompt) {
+    chrome.runtime.sendMessage({
+        action: 'processText',
+        data: { text: text, prompt: prompt }
+    }, (response) => {
+        if (response && response.data) {
+            showPopup(response.data);
+        } else if (response && response.error) {
+            showPopup(`Error: ${response.error.message}`);
+        } else {
+            showPopup('An unknown error occurred.');
+        }
     });
+}
+
+async function processImage(imageUrl, prompt) {
+    try {
+        const { base64Content, mimeType } = await getImageData(imageUrl);
+        chrome.runtime.sendMessage({
+            action: 'processImage',
+            data: { base64Content: base64Content, mimeType: mimeType, prompt: prompt }
+        }, (response) => {
+            if (response && response.data) {
+                showPopup(response.data);
+            } else if (response && response.error) {
+                showPopup(`Error: ${response.error.message}`);
+            } else {
+                showPopup('An unknown error occurred.');
+            }
+        });
+    } catch (error) {
+        showPopup(`Error: ${error.message}`);
+    }
+}
+
+async function getImageData(imageUrl) {
+    try {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const mimeType = blob.type;
+
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64Content = reader.result.split(',')[1];
+                resolve({ base64Content, mimeType });
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    } catch (error) {
+        throw new Error(`Failed to fetch image: ${error.message}`);
+    }
 }
 
 function getSettings() {
