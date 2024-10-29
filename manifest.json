@@ -1,0 +1,35 @@
+{
+    "manifest_version": 3,
+    "name": "Chromium Intelligence",
+    "version": "1.0",
+    "description": "A powerful Chromium extension that leverages the Gemini API to assist with various text operations, image analysis, and PDF processing.",
+    "icons": {
+        "16": "icon16.png",
+        "32": "icon32.png",
+        "48": "icon48.png",
+        "128": "icon128.png"
+    },
+    "permissions": [
+        "contextMenus",
+        "storage",
+        "activeTab",
+        "scripting",
+        "downloads"
+    ],
+    "host_permissions": [
+        "https://generativelanguage.googleapis.com/*",
+        "<all_urls>"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["contents.js"]
+        }
+    ],
+    "action": {
+        "default_popup": "popup.html"
+    }
+}
