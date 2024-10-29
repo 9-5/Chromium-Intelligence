@@ -1,3 +1,5 @@
+<img src="icon.png" height="250" width="250"/>
+
 # Chromium Intelligence
 
 A powerful Chromium extension that leverages the Gemini API to assist with various text operations, image analysis, and PDF processing.
@@ -21,7 +23,7 @@ A powerful Chromium extension that leverages the Gemini API to assist with vario
 
 ## Requirements
 
-- Google Chrome Browser
+- Chromium Based Browser [Chrome, Edge, Opera GX, Brave, etc.]
 - Gemini API Key (obtain from [Google AI Studio](https://ai.google.dev))
 - Active internet connection
 
