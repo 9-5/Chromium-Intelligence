@@ -17,13 +17,13 @@
             <h2>AI Settings</h2>
             <label for="platform">Platform</label>
             <select id="platform">
-                <option>Gemini</option>
-                <option>Cloudflare Worker AI</option>
-                <option>OpenRouter</option>
+                <option value="Gemini">Gemini</option>
+                <option value="Cloudflare Worker AI">Cloudflare Worker AI</option>
+                <option value="OpenRouter">OpenRouter</option>
             </select>
             <label for="model">Model</label>
             <select id="model">
-                <option>gemini-1.5-flash</option>
+                <option value="gemini-1.5-flash">gemini-1.5-flash</option>
             </select>
             <label class="checkbox-label">
                 <input type="checkbox" id="use-specific-model">
@@ -31,6 +31,7 @@
             </label>
             <label for="custom-model">Custom Model</label>
             <input type="text" id="custom-model" placeholder="" disabled>
+            <button id="save-settings">Save Settings</button>
         </div>
         <div id="api-keys-section" class="section api-keys-section" style="display: none;">
             <h2>API Keys</h2>
@@ -55,6 +56,7 @@
                 <input type="password" id="cloudflare-api-key">
                 <i class="fas fa-eye toggle-visibility" id="toggle-cloudflare-api-key"></i>
             </div>
+            <button id="save-api-keys">Save API Keys</button>
         </div>
         <div id="about-section" class="section" style="display: none;">
             <h2>About</h2>

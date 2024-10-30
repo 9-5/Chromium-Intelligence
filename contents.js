@@ -61,81 +61,97 @@ function showPromptInput(fileUrl, fileType) {
     });
 }
 
-function processFile(fileUrl, fileType, prompt) {
-    const processMap = {
-        'image': processImage,
-        'pdf': processPDF
-    };
-    if (processMap[fileType]) {
-        processMap[fileType](fileUrl, prompt);
+async function processFile(fileUrl, fileType, prompt) {
+    const settings = await getSettings();
+    if (settings.platform === 'Gemini') {
+        if (fileType === 'image') {
+            processImage(fileUrl, prompt);
+        } else if (fileType === 'pdf') {
+            processPDF(fileUrl, prompt);
+        }
+    } else {
+        showPopup('File processing is only supported for Gemini platform');
     }
 }
 
-function processImage(imageUrl, prompt) {
-    toDataURL(imageUrl, dataUrl => {
-        const base64Content = dataUrl.split(',')[1];
-        sendApiRequest(base64Content, 'image/png', prompt);
-    });
-}
-
-function processPDF(pdfUrl, prompt) {
-    chrome.runtime.sendMessage({ action: 'fetchUrl', url: pdfUrl }, response => {
-        if (response.error) {
-            console.error('Error fetching PDF:', response.error);
-            showPopup('Error: Unable to fetch PDF file');
-        } else {
-            const base64Content = response.data.split(',')[1];
-            sendApiRequest(base64Content, 'application/pdf', prompt);
-        }
-    });
-}
-
-function sendApiRequest(base64Content, mimeType, prompt) {
-    chrome.storage.sync.get('api_key', data => {
-        const apiKey = data.api_key;
-        if (!apiKey) {
-            showPopup('API key not found');
-            return;
-        }
-        const requestBody = {
-            contents: [{
-                parts: [
-                    { inlineData: { mimeType, data: base64Content } },
-                    { text: prompt }
-                ]
-            }]
-        };
-        fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestBody)
-        })
-        .then(response => response.json())
-        .then(data => {
-            const content = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No valid response from API';
-            showPopup(content);
-        })
-        .catch(error => {
-            console.error('Error:', error);
+async function processImage(imageUrl, prompt) {
+    const settings = await getSettings();
+    if (settings.platform === 'Gemini') {
+        const base64Content = await getBase64Image(imageUrl);
+        const mimeType = 'image/png'; // Assuming PNG for simplicity
+        try {
+            const response = await apiHandlers.gemini.processImage(
+                base64Content,
+                mimeType,
+                prompt,
+                settings.gemini_api_key
+            );
+            showPopup(response);
+        } catch (error) {
             showPopup(`Error: ${error.toString()}`);
-        });
+        }
+    } else {
+        showPopup('Image processing is only supported for Gemini platform');
+    }
+}
+
+async function processPDF(pdfUrl, prompt) {
+    const settings = await getSettings();
+    if (settings.platform === 'Gemini') {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                chrome.runtime.sendMessage({ action: 'fetchUrl', url: pdfUrl }, response => {
+                    if (response.error) {
+                        reject(new Error(response.error));
+                    } else {
+                        resolve(response.data);
+                    }
+                });
+            });
+            const base64Content = response.split(',')[1];
+            const result = await apiHandlers.gemini.processImage(
+                base64Content,
+                'application/pdf',
+                prompt,
+                settings.gemini_api_key
+            );
+            showPopup(result);
+        } catch (error) {
+            showPopup(`Error: ${error.toString()}`);
+        }
+    } else {
+        showPopup('PDF processing is only supported for Gemini platform');
+    }
+}
+
+async function getBase64Image(imageUrl) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = this.width;
+            canvas.height = this.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(this, 0, 0);
+            resolve(canvas.toDataURL('image/png').split(',')[1]);
+        };
+        img.onerror = reject;
+        img.src = imageUrl;
     });
 }
 
-function toDataURL(src, callback, outputFormat) {
-    const img = new Image();
-    img.crossOrigin = 'Anonymous';
-    img.onload = function() {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = this.naturalWidth;
-        canvas.height = this.naturalHeight;
-        ctx.drawImage(this, 0, 0);
-        callback(canvas.toDataURL(outputFormat));
-    };
-    img.src = src;
-    if (img.complete || img.complete === undefined) {
-        img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
-        img.src = src;
-    }
+function getSettings() {
+    return new Promise((resolve) => {
+        chrome.storage.sync.get([
+            'platform',
+            'model',
+            'use_specific_model',
+            'custom_model',
+            'gemini_api_key',
+            'openrouter_api_key',
+            'cloudflare_id',
+            'cloudflare_api_key'
+        ], resolve);
+    });
 }
