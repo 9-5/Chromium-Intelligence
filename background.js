@@ -36,6 +36,9 @@ const aiAssistantPrompts = {
 const apiHandlers = {
     gemini: {
         makeApiCall: async (systemPrompt, prePrompt, textInput, apiKey) => {
+            const settings = await getSettings();
+            const selectedModel = settings.use_specific_model ? settings.custom_model : settings.model;
+
             const requestBody = {
                 "system_instruction": {
                     "parts": {
@@ -49,7 +52,7 @@ const apiHandlers = {
                 }
             };
 
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -62,6 +65,47 @@ const apiHandlers = {
                 return data.candidates[0].content.parts[0].text;
             } else {
                 throw new Error('No valid response from Gemini API');
+            }
+        },
+
+        processImage: async (base64Content, mimeType, prompt, apiKey) => {
+            const settings = await getSettings();
+            const selectedModel = settings.use_specific_model ? settings.custom_model : settings.model;
+
+            const requestBody = {
+                "contents": [{
+                    "parts": [
+                        {"text": prompt},
+                        {
+                            "inline_data": {
+                                "mime_type": mimeType,
+                                "data": base64Content
+                            }
+                        }
+                    ]
+                }]
+            };
+
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+            }
+
+            const data = await response.json();
+            console.log('API Response:', data);
+
+            if (data.candidates && data.candidates.length > 0 && data.candidates[0].content) {
+                return data.candidates[0].content.parts[0].text;
+            } else {
+                throw new Error(`Invalid API response: ${JSON.stringify(data)}`);
             }
         }
     },
@@ -146,52 +190,43 @@ function getSettings() {
 async function makeApiCall(systemPrompt, prePrompt, textInput, callback) {
     try {
         const settings = await getSettings();
-        const platform = settings.platform?.toLowerCase() || 'gemini';
+        const platform = settings.platform?.toLowerCase().replace(/\s+/g, '') || 'gemini';
         
-        if (!apiHandlers[platform]) {
-            throw new Error(`Unsupported platform: ${platform}`);
+        const platformMap = {
+            'gemini': 'gemini',
+            'cloudflareworkerai': 'cloudflare',
+            'openrouter': 'openrouter'
+        };
+
+        const handlerKey = platformMap[platform];
+        if (!handlerKey || !apiHandlers[handlerKey]) {
+            throw new Error(`Unsupported platform: ${settings.platform}`);
         }
 
-        let response;
-        switch (platform) {
+        const handler = apiHandlers[handlerKey];
+        let apiKey, model, accountId;
+
+        switch (handlerKey) {
             case 'gemini':
-                if (!settings.gemini_api_key) throw new Error('Gemini API key not found');
-                response = await apiHandlers.gemini.makeApiCall(
-                    systemPrompt,
-                    prePrompt,
-                    textInput,
-                    settings.gemini_api_key
-                );
+                apiKey = settings.gemini_api_key;
+                model = settings.use_specific_model ? settings.custom_model : settings.model;
                 break;
-
             case 'openrouter':
-                if (!settings.openrouter_api_key) throw new Error('OpenRouter API key not found');
-                const openrouterModel = settings.use_specific_model ? settings.custom_model : settings.model;
-                response = await apiHandlers.openrouter.makeApiCall(
-                    systemPrompt,
-                    prePrompt,
-                    textInput,
-                    settings.openrouter_api_key,
-                    openrouterModel
-                );
+                apiKey = settings.openrouter_api_key;
+                model = settings.custom_model;
                 break;
-
             case 'cloudflare':
-                if (!settings.cloudflare_api_key || !settings.cloudflare_id) {
-                    throw new Error('Cloudflare credentials not found');
-                }
-                const cloudflareModel = settings.use_specific_model ? settings.custom_model : settings.model;
-                response = await apiHandlers.cloudflare.makeApiCall(
-                    systemPrompt,
-                    prePrompt,
-                    textInput,
-                    settings.cloudflare_api_key,
-                    settings.cloudflare_id,
-                    cloudflareModel
-                );
+                apiKey = settings.cloudflare_api_key;
+                accountId = settings.cloudflare_id;
+                model = settings.custom_model;
                 break;
         }
 
+        if (!apiKey) {
+            throw new Error('API key not found');
+        }
+
+        const response = await handler.makeApiCall(systemPrompt, prePrompt, textInput, apiKey, accountId, model);
         callback(null, response);
     } catch (error) {
         callback(error.toString(), null);
@@ -208,29 +243,19 @@ function updateContextMenus() {
             });
         }
 
-        chrome.storage.sync.get('platform', ({ platform }) => {
-            if (platform === 'Gemini') {
-                chrome.contextMenus.create({
-                    id: "processImage",
-                    title: "Process Image",
-                    contexts: ["image"]
-                });
+        chrome.contextMenus.create({
+            id: "processImage",
+            title: "Process Image",
+            contexts: ["image"]
+        });
 
-                chrome.contextMenus.create({
-                    id: "processPDF",
-                    title: "Process PDF",
-                    contexts: ["link"]
-                });
-            }
+        chrome.contextMenus.create({
+            id: "processPDF",
+            title: "Process PDF",
+            contexts: ["link"]
         });
     });
 }
-
-chrome.storage.onChanged.addListener((changes) => {
-    if (changes.platform) {
-        updateContextMenus();
-    }
-});
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
     if (info.menuItemId in aiAssistantPrompts) {
@@ -240,28 +265,62 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         makeApiCall(systemPrompt, prePrompt, textInput, (error, response) => {
             if (error) {
                 console.error('Error:', error);
-                chrome.tabs.sendMessage(tab.id, { 
-                    action: 'showPopup', 
-                    data: `Error: ${error}` 
-                });
+                chrome.tabs.sendMessage(tab.id, { action: 'showPopup', data: `Error: ${error}` });
             } else {
-                chrome.tabs.sendMessage(tab.id, { 
-                 action: 'showPopup', 
-                	data: response 
-                });
+                chrome.tabs.sendMessage(tab.id, { action: 'showPopup', data: response });
             }
         });
-    } else if (info.menuItemId === "processImage") {
-        chrome.tabs.sendMessage(tab.id, { 
-            action: 'showPromptInput', 
-            fileUrl: info.srcUrl, 
-            fileType: 'image' 
+    } else if (info.menuItemId === "processImage" || info.menuItemId === "processPDF") {
+        chrome.tabs.sendMessage(tab.id, {
+            action: 'showPromptInput',
+            fileUrl: info.srcUrl || info.linkUrl,
+            fileType: info.menuItemId === "processImage" ? "image" : "pdf"
         });
-    } else if (info.menuItemId === "processPDF") {
-        chrome.tabs.sendMessage(tab.id, { 
-            action: 'showPromptInput', 
-            fileUrl: info.linkUrl, 
-            fileType: 'pdf' 
-        });
+    }
+});
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'fetchUrl') {
+        (async () => {
+            try {
+                const response = await fetch(request.url);
+                const blob = await response.blob();
+                
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        sendResponse({data: reader.result});
+                        resolve();
+                    };
+                    reader.onerror = () => {
+                        sendResponse({error: 'Failed to read file'});
+                        resolve();
+                    };
+                    reader.readAsDataURL(blob);
+                });
+            } catch (error) {
+                sendResponse({error: error.toString()});
+            }
+        })();
+        
+        return true;
+    }
+    if (request.action === 'processImage') {
+        (async () => {
+            try {
+                const { base64Content, mimeType, prompt, apiKey } = request.data;
+                const response = await apiHandlers.gemini.processImage(
+                    base64Content,
+                    mimeType,
+                    prompt,
+                    apiKey
+                );
+                sendResponse({ data: response });
+            } catch (error) {
+                console.error('Error in background script:', error);
+                sendResponse({ error: { message: error.message, details: error.toString() } });
+            }
+        })();
+        return true; // Required to use sendResponse asynchronously
     }
 });

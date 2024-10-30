@@ -26,7 +26,9 @@ function toggleModelSelection() {
     } else {
         modelDropdown.disabled = false;
         modelDropdown.value = "gemini-1.5-flash";
+        customModelInput.value = "";
         customModelInput.disabled = true;
+        
     }
 }
 
@@ -46,6 +48,7 @@ function handlePlatformChange() {
         modelDropdown.disabled = false;
         modelDropdown.value = "gemini-1.5-flash";
         customModelInput.disabled = true;
+        customModelInput.value = "";
     }
 }
 
@@ -66,8 +69,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById('platform').addEventListener('change', handlePlatformChange);
-    document.getElementById('use-specific-model').addEventListener('change', toggleModelSelection);
-    document.getElementById('use-specific-model').addEventListener('click', function(event) {
+    document.getElementById('use-specific-model').addEventListener('change', function(event) {
+        var platformDropdown = document.getElementById('platform');
+        if (platformDropdown.value === "Cloudflare Worker AI" || platformDropdown.value === "OpenRouter") {
+            event.preventDefault();
+            this.checked = true; // Ensure checkbox stays checked for these platforms
+        } else {
+            toggleModelSelection();
+        }
+    });
+        document.getElementById('use-specific-model').addEventListener('click', function(event) {
         var platformDropdown = document.getElementById('platform');
         if (platformDropdown.value === "Cloudflare Worker AI" || platformDropdown.value === "OpenRouter") {
             event.preventDefault();

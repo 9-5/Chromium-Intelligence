@@ -27,6 +27,27 @@ body {
 .navbar a.active {
     border-bottom: 2px solid #268bd2;
 }
+
+.solarized-button {
+    background-color: #073642;
+    color: #839496;
+    border: 1px solid #268bd2;
+    padding: 5px 12px;
+    margin-right: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.solarized-button:hover {
+    background-color: #268bd2;
+    color: #002b36;
+}
+
+.solarized-button:active {
+    background-color: #2aa198;
+}
+
+
 .settings-section, .api-keys-section {
     margin-top: 20px;
 }
@@ -53,6 +74,7 @@ body {
 }
 
 .settings-section .checkbox-label input[type="checkbox"] {
+    width: auto;
     margin: 0;
     margin-right: 8px; /* Space between checkbox and label text */
 }
