@@ -1,3 +1,6 @@
+chrome.action.onClicked.addListener((tab) => {
+    chrome.runtime.openOptionsPage();
+});
 (function() {
     const aiAssistantPrompts = {
         'Proofread': [

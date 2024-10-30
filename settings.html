@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chromium Intelligence</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+    <div class="navbar">
+        <i class="fas fa-cog"></i>
+        <a href="#" class="active" data-section="settings-section">Settings</a>
+        <a href="#" data-section="api-keys-section">API Keys</a>
+        <a href="#" data-section="about-section">About</a>
+    </div>
+    <div class="container">
+        <div id="settings-section" class="section settings-section">
+            <h2>AI Settings</h2>
+            <label for="platform">Platform</label>
+            <select id="platform">
+                <option>Gemini</option>
+                <option>Cloudflare Worker AI</option>
+                <option>OpenRouter</option>
+            </select>
+            <label for="model">Model</label>
+            <select id="model">
+                <option>gemini-1.5-flash</option>
+            </select>
+            <label class="checkbox-label">
+                <input type="checkbox" id="use-specific-model">
+                Use specific model?
+            </label>
+            <label for="custom-model">Custom Model</label>
+            <input type="text" id="custom-model" placeholder="" disabled>
+        </div>
+        <div id="api-keys-section" class="section api-keys-section" style="display: none;">
+            <h2>API Keys</h2>
+            <label for="gemini-api-key">Gemini API Key</label>
+            <div class="input-group">
+                <input type="password" id="gemini-api-key">
+                <i class="fas fa-eye toggle-visibility" id="toggle-gemini"></i>
+            </div>
+            <label for="openrouter-api-key">OpenRouter API Key</label>
+            <div class="input-group">
+                <input type="password" id="openrouter-api-key">
+                <i class="fas fa-eye toggle-visibility" id="toggle-openrouter"></i>
+            </div>
+            <label for="cloudflare-id">Cloudflare ID & API Key</label>
+            <div class="input-group">
+                <label class="small-label" for="cloudflare-id">ID</label>
+                <input type="password" id="cloudflare-id">
+                <i class="fas fa-eye toggle-visibility" id="toggle-cloudflare-id"></i>
+            </div>
+            <div class="input-group">
+                <label class="small-label" for="cloudflare-api-key">API Key</label>
+                <input type="password" id="cloudflare-api-key">
+                <i class="fas fa-eye toggle-visibility" id="toggle-cloudflare-api-key"></i>
+            </div>
+        </div>
+        <div id="about-section" class="section" style="display: none;">
+            <h2>About</h2>
+            <p>Developed by John Le, 0KB.ORG.</p>
+        </div>
+    </div>
+    <script src="settings.js"></script>
+</body>
+</html>
