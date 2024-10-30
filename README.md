@@ -2,7 +2,13 @@
 
 # Chromium Intelligence
 
-A powerful Chromium extension that leverages the Gemini API to assist with various text operations, image analysis, and PDF processing.
+A powerful Chromium extension that leverages the multiple AI APIs to assist with various text operations, image analysis, and PDF processing.
+
+## Supported Platforms
+
+- [Google Gemini](https://ai.google.dev/gemini-api/docs/models/gemini)
+- [Cloudflare AI Workers](https://developers.cloudflare.com/workers-ai/models/)
+- [OpenRouter AI](https://openrouter.ai/)
 
 ## Features
 
@@ -25,6 +31,8 @@ A powerful Chromium extension that leverages the Gemini API to assist with vario
 
 - Chromium Based Browser [Chrome, Edge, Opera GX, Brave, etc.]
 - Gemini API Key (obtain from [Google AI Studio](https://ai.google.dev))
+- Cloudflare API Key (obtain from [Cloudflare AI](https://developers.cloudflare.com/workers-ai/models/))
+- OpenRouter API Key (obtain from [OpenRouter AI](https://openrouter.ai/))
 - Active internet connection
 
 ## Setup
@@ -72,19 +80,20 @@ The processed text or analysis results will appear in a popup window with option
  ├── manifest.json # Extension configuration
  ├── background.js # Background service worker
  ├── contents.js # Content script for webpage interaction
- ├── popup.html # API key settings interface
- ├── popup.js # Settings functionality
+ ├── settings.js # Extension settings
+ ├── settings.html # Extension settings UI
+ ├── settings.css # Extension settings UI styles
  └── README.md # This file
 ```
 
 ## Technical Details
 
 - Built using Manifest V3
-- Uses the Gemini 1.5 Flash API
+- Can use the Gemini, Cloudflare Worker AI, and OpenRouter APIs
 - Implements secure API key storage
 - Features responsive popup UI
 - Maintains original text language in responses
-- Supports image and PDF processing with custom prompts
+- Supports image and PDF processing with custom prompts [Gemini only at this point!]
 
 ## Privacy Notice
 
@@ -108,9 +117,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
-- Built using Google's Gemini API
+- Built using Google's Gemini, Cloudflare Workers AI, and OpenRouter APIs
 - Inspired by Apple Intelligence
-
----
-
-_Note: This extension requires a valid Gemini API key to function. Get yours at [Google AI Studio](https://ai.google.dev)_
