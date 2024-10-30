@@ -87,3 +87,6 @@ body {
     font-size: 12px;
     margin-bottom: 5px;
 }
+.api-keys-section .input-group .toggle-visibility:hover {
+    color: #268bd2;
+}
