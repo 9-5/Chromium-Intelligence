@@ -77,13 +77,25 @@ The processed text or analysis results will appear in a popup window with option
 ## Files Structure
 ```
 \
- ├── manifest.json # Extension configuration
- ├── background.js # Background service worker
- ├── contents.js # Content script for webpage interaction
- ├── settings.js # Extension settings
- ├── settings.html # Extension settings UI
- ├── settings.css # Extension settings UI styles
- └── README.md # This file
+├── ext                     # Extension folder
+│   ├── logo.png            # Extension logo
+│   ├── icon                # Icon folder
+│   │   ├── icon16.png
+│   │   ├── icon32.png
+│   │   ├── icon48.png
+│   │   └── icon128.png
+│   ├── settings            # Settings folder
+│   │    ├── settings.html  # Extension settings
+│   │    ├── settings.css   # Extension settings UI
+│   │    └── settings.js    # Extension settings UI styles
+│   └── popup               # Popup folder
+│        ├── popup.html     # Popup UI
+│        ├── popup.css      # Popup UI styles
+│        └── popup.js       # Popup UI script
+├── manifest.json           # Extension configuration
+├── background.js           # Background service worker
+├── contents.js             # Content script for webpage interaction
+└── README.md               # This file
 ```
 
 ## Technical Details
