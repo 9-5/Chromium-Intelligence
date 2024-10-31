@@ -7,7 +7,7 @@
 </head>
 <body>
     <div class="navbar">
-        <i class="fas fa-cog"></i>
+        <img src="logo.png" alt="Logo" class="logo">
         <a href="#" class="active" data-section="settings-section">Settings</a>
         <a href="#" data-section="api-keys-section">API Keys</a>
         <a href="#" data-section="about-section">About</a>
@@ -38,25 +38,34 @@
         <div id="api-keys-section" class="section api-keys-section" style="display: none;">
             <h2>API Keys</h2>
             <label for="gemini-api-key">Gemini API Key</label>
-            <div class="input-group">
-                <input type="password" id="gemini-api-key">
-                <i class="fas fa-eye toggle-visibility" id="toggle-gemini"></i>
+            <div class="platform-group">
+                <div class="input-group">
+                    <input type="password" id="gemini-api-key">
+                    <i class="fas fa-eye toggle-visibility" id="toggle-gemini"></i>
+                </div>
+                <button id="test-gemini" class="solarized-button test-button">Test</button>
             </div>
             <label for="openrouter-api-key">OpenRouter API Key</label>
-            <div class="input-group">
-                <input type="password" id="openrouter-api-key">
-                <i class="fas fa-eye toggle-visibility" id="toggle-openrouter"></i>
+            <div class="platform-group">
+                <div class="input-group">
+                    <input type="password" id="openrouter-api-key">
+                    <i class="fas fa-eye toggle-visibility" id="toggle-openrouter"></i>
+                </div>
+                <button id="test-openrouter" class="solarized-button test-button">Test</button>
             </div>
             <label for="cloudflare-id">Cloudflare ID & API Key</label>
-            <div class="input-group">
-                <label class="small-label" for="cloudflare-id">ID</label>
-                <input type="password" id="cloudflare-id">
-                <i class="fas fa-eye toggle-visibility" id="toggle-cloudflare-id"></i>
-            </div>
-            <div class="input-group">
-                <label class="small-label" for="cloudflare-api-key">API Key</label>
-                <input type="password" id="cloudflare-api-key">
-                <i class="fas fa-eye toggle-visibility" id="toggle-cloudflare-api-key"></i>
+            <div class="cloudflare-group">
+                <div class="input-group">
+                    <label class="small-label" for="cloudflare-id">ID</label>
+                    <input type="password" id="cloudflare-id">
+                    <i class="fas fa-eye toggle-visibility" id="toggle-cloudflare-id"></i>
+                </div>
+                <div class="input-group">
+                    <label class="small-label" for="cloudflare-api-key">API Key</label>
+                    <input type="password" id="cloudflare-api-key">
+                    <i class="fas fa-eye toggle-visibility" id="toggle-cloudflare-api-key"></i>
+                </div>
+                <button id="test-cloudflare" class="solarized-button test-button">Test</button>
             </div>
             <button id="save-api-keys" class="solarized-button">Save API Keys</button>
         </div>
