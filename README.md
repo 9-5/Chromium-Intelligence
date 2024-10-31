@@ -1,4 +1,4 @@
-<img src="ext\icon\logo.png" height="250" width="250"/>
+<img src=".\ext\icon\logo.png" height="250" width="250"/>
 
 # Chromium Intelligence
 
