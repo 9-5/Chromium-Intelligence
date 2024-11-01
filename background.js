@@ -158,7 +158,7 @@ const apiHandlers = {
             if (data.success && data.result && data.result.response) {
                 return data.result.response;
             } else {
-                throw new Error('No valid response from Cloudflare API');
+                throw new Error('No valid response from Cloudflare Workers AI');
             }
         }
     }
@@ -174,16 +174,17 @@ chrome.action.onClicked.addListener((tab) => {
 
 function getSettings() {
     return new Promise((resolve) => {
-        chrome.storage.sync.get([
-            'platform',
-            'model',
-            'use_specific_model',
-            'custom_model',
-            'gemini_api_key',
-            'openrouter_api_key',
-            'cloudflare_id',
-            'cloudflare_api_key'
-        ], resolve);
+        chrome.storage.sync.get({
+            // Add default values and use consistent key names
+            'platform': 'Gemini',
+            'model': 'gemini-1.5-flash',
+            'use_specific_model': false,
+            'custom_model': '',
+            'geminiApiKey': '',  // Match the key names used in settings.js
+            'openrouterApiKey': '', // Match the key names used in settings.js
+            'cloudflareId': '', // Match the key names used in settings.js
+            'cloudflareApiKey': '' // Match the key names used in settings.js
+        }, resolve);
     });
 }
 
@@ -208,30 +209,39 @@ async function makeApiCall(systemPrompt, prePrompt, textInput, callback) {
 
         switch (handlerKey) {
             case 'gemini':
-                apiKey = settings.gemini_api_key;
+                apiKey = settings.geminiApiKey; // Updated key name
                 model = settings.use_specific_model ? settings.custom_model : settings.model;
                 break;
             case 'openrouter':
-                apiKey = settings.openrouter_api_key;
+                apiKey = settings.openrouterApiKey; // Updated key name
                 model = settings.custom_model;
                 break;
             case 'cloudflare':
-                apiKey = settings.cloudflare_api_key;
-                accountId = settings.cloudflare_id;
+                apiKey = settings.cloudflareApiKey; // Updated key name
+                accountId = settings.cloudflareId; // Updated key name
                 model = settings.custom_model;
                 break;
         }
 
         if (!apiKey) {
-            throw new Error('API key not found');
+            throw new Error(`API key not found for platform: ${settings.platform}`);
         }
+
+        // Add logging for debugging
+        console.log('Platform:', platform);
+        console.log('Handler Key:', handlerKey);
+        console.log('API Key exists:', !!apiKey);
+        console.log('Account ID exists:', !!accountId);
+        console.log('Model:', model);
 
         const response = await handler.makeApiCall(systemPrompt, prePrompt, textInput, apiKey, accountId, model);
         callback(null, response);
     } catch (error) {
+        console.error('makeApiCall error:', error);
         callback(error.toString(), null);
     }
-}
+}   
+
 
 function updateContextMenus() {
     chrome.contextMenus.removeAll(() => {

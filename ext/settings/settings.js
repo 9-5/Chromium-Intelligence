@@ -1,3 +1,51 @@
+const platformModels = {
+    'Gemini': [
+        'gemini-1.5-pro',
+        'gemini-1.5-flash',
+        'gemini-1.5-flash-8b'
+    ],
+    'Cloudflare Worker AI': [],
+    'OpenRouter': []
+};
+
+function populateModelDropdown(platform) {
+    const modelSelect = document.getElementById('model');
+    const customModelInput = document.getElementById('custom-model');
+    const useSpecificModel = document.getElementById('use-specific-model');
+    
+    // Clear existing options
+    modelSelect.innerHTML = '';
+    
+    if (platformModels[platform] && platformModels[platform].length > 0) {
+        platformModels[platform].forEach(model => {
+            const option = document.createElement('option');
+            option.value = model;
+            option.textContent = model;
+            modelSelect.appendChild(option);
+        });
+        
+        if (platform === 'Gemini') {
+            modelSelect.disabled = useSpecificModel.checked;
+            customModelInput.disabled = !useSpecificModel.checked;
+        } else {
+            modelSelect.disabled = true;
+            customModelInput.disabled = false;
+            useSpecificModel.checked = true;
+        }
+    } else {
+        modelSelect.disabled = true;
+        customModelInput.disabled = false;
+        useSpecificModel.checked = true;
+    }
+}
+
+function handlePlatformChange() {
+    const platformSelect = document.getElementById('platform');
+    const selectedPlatform = platformSelect.value;
+    populateModelDropdown(selectedPlatform);
+    toggleModelSelection();
+}
+
 function toggleVisibility(inputId, iconId) {
     var input = document.getElementById(inputId);
     var icon = document.getElementById(iconId);
@@ -25,29 +73,11 @@ function toggleModelSelection() {
         useSpecificModel.checked = true;
     } else {
         modelDropdown.disabled = false;
-        modelDropdown.value = "gemini-1.5-flash";
+        if (platformModels[platformDropdown.value] && platformModels[platformDropdown.value].length > 0) {
+            modelDropdown.value = platformModels[platformDropdown.value][0];
+        }
         customModelInput.value = "";
         customModelInput.disabled = true;
-    }
-}
-
-function handlePlatformChange() {
-    var platformDropdown = document.getElementById('platform');
-    var useSpecificModel = document.getElementById('use-specific-model');
-    var modelDropdown = document.getElementById('model');
-    var customModelInput = document.getElementById('custom-model');
-
-    if (platformDropdown.value === "Cloudflare Worker AI" || platformDropdown.value === "OpenRouter") {
-        useSpecificModel.checked = true;
-        modelDropdown.value = "";
-        modelDropdown.disabled = true;
-        customModelInput.disabled = false;
-    } else {
-        useSpecificModel.checked = false;
-        modelDropdown.disabled = false;
-        modelDropdown.value = "gemini-1.5-flash";
-        customModelInput.disabled = true;
-        customModelInput.value = "";
     }
 }
 
@@ -87,7 +117,6 @@ function buttonStatus(message, type = 'success') {
     }, 5000);
 }
 
-// API Test Functions
 async function testGeminiAPI() {
     const apiKey = document.getElementById('gemini-api-key').value;
     if (!apiKey) {
@@ -96,7 +125,7 @@ async function testGeminiAPI() {
     }
 
     try {
-        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=' + apiKey, {
+        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + apiKey, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -134,7 +163,7 @@ async function testOpenRouterAPI() {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${apiKey}`,
-                'HTTP-Referer': 'https://github.com/johnle/chromium-intelligence',
+                'HTTP-Referer': 'https://github.com/9-5/chromium-intelligence',
                 'X-Title': 'Chromium Intelligence'
             },
             body: JSON.stringify({
@@ -190,36 +219,62 @@ async function testCloudflareAPI() {
     }
 }
 
+function setModelValue(savedModel) {
+    const modelSelect = document.getElementById('model');
+    if (savedModel && Array.from(modelSelect.options).some(option => option.value === savedModel)) {
+        modelSelect.value = savedModel;
+        console.log('Setting model to saved value:', savedModel);
+    } else {
+        console.log('Saved model not found in options, defaulting to first option');
+        modelSelect.selectedIndex = 0;
+    }
+}
+
+
 function loadSettings() {
     chrome.storage.sync.get({
         'platform': 'Gemini',
         'model': 'gemini-1.5-flash',
         'useSpecificModel': false,
-        'custom_model': '', // Changed to match the key used in popup
+        'custom_model': '',
         'geminiApiKey': '',
         'openrouterApiKey': '',
         'cloudflareId': '',
         'cloudflareApiKey': ''
     }, function(items) {
+        console.log('Loaded settings:', items);
         document.getElementById('platform').value = items.platform;
-        document.getElementById('model').value = items.model;
+        
+        populateModelDropdown(items.platform);
+        
+        // Set the model value after a short delay to ensure the dropdown has been populated
+        setTimeout(() => {
+            setModelValue(items.model);
+        }, 0);
+        
         document.getElementById('use-specific-model').checked = items.useSpecificModel;
-        document.getElementById('custom-model').value = items.custom_model; // Changed to match the key used in popup
+        document.getElementById('custom-model').value = items.custom_model;
         document.getElementById('gemini-api-key').value = items.geminiApiKey;
         document.getElementById('openrouter-api-key').value = items.openrouterApiKey;
         document.getElementById('cloudflare-id').value = items.cloudflareId;
         document.getElementById('cloudflare-api-key').value = items.cloudflareApiKey;
-        handlePlatformChange();
+        
+        toggleModelSelection();
     });
 }
-
 function saveSettings() {
+    const platform = document.getElementById('platform').value;
+    const model = document.getElementById('model').value;
+    const useSpecificModel = document.getElementById('use-specific-model').checked;
+    const customModel = document.getElementById('custom-model').value;
+
     chrome.storage.sync.set({
-        platform: document.getElementById('platform').value,
-        model: document.getElementById('model').value,
-        useSpecificModel: document.getElementById('use-specific-model').checked,
-        custom_model: document.getElementById('custom-model').value // Changed to match the key used in popup
+        platform: platform,
+        model: model,
+        useSpecificModel: useSpecificModel,
+        custom_model: customModel
     }, function() {
+        console.log('Saved settings:', { platform, model, useSpecificModel, custom_model: customModel });
         buttonStatus('Settings saved!', 'success');
     });
 }
@@ -250,6 +305,35 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.add('active');
         });
     });
+
+    const toggleGeminiButton = document.getElementById('toggle-gemini');
+    if (toggleGeminiButton) {
+        toggleGeminiButton.addEventListener('click', function() {
+            toggleVisibility('gemini-api-key', 'toggle-gemini');
+        });
+    }
+
+    const toggleOpenRouter = document.getElementById('toggle-openrouter');
+    if (toggleOpenRouter) {
+        toggleOpenRouter.addEventListener('click', function() {
+            toggleVisibility('openrouter-api-key', 'toggle-openrouter');
+        });
+    }
+
+    const toggleCloudflareID = document.getElementById('toggle-cloudflare-id');
+    if (toggleCloudflareID) {
+        toggleCloudflareID.addEventListener('click', function() {
+            toggleVisibility('cloudflare-id', 'toggle-cloudflare-id');
+        });
+    }
+
+    const toggleCloudflareKey = document.getElementById('toggle-cloudflare-api-key');
+    if (toggleCloudflareKey) {
+        toggleCloudflareKey.addEventListener('click', function() {
+            toggleVisibility('cloudflare-api-key', 'toggle-cloudflare-api-key');
+        });
+    }
+
 
     const platformSelect = document.getElementById('platform');
     if (platformSelect) {
