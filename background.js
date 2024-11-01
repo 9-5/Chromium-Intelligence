@@ -175,15 +175,14 @@ chrome.action.onClicked.addListener((tab) => {
 function getSettings() {
     return new Promise((resolve) => {
         chrome.storage.sync.get({
-            // Add default values and use consistent key names
             'platform': 'Gemini',
             'model': 'gemini-1.5-flash',
             'use_specific_model': false,
             'custom_model': '',
-            'geminiApiKey': '',  // Match the key names used in settings.js
-            'openrouterApiKey': '', // Match the key names used in settings.js
-            'cloudflareId': '', // Match the key names used in settings.js
-            'cloudflareApiKey': '' // Match the key names used in settings.js
+            'geminiApiKey': '',
+            'openrouterApiKey': '',
+            'cloudflareId': '',
+            'cloudflareApiKey': ''
         }, resolve);
     });
 }
@@ -209,16 +208,16 @@ async function makeApiCall(systemPrompt, prePrompt, textInput, callback) {
 
         switch (handlerKey) {
             case 'gemini':
-                apiKey = settings.geminiApiKey; // Updated key name
+                apiKey = settings.geminiApiKey;
                 model = settings.use_specific_model ? settings.custom_model : settings.model;
                 break;
             case 'openrouter':
-                apiKey = settings.openrouterApiKey; // Updated key name
+                apiKey = settings.openrouterApiKey;
                 model = settings.custom_model;
                 break;
             case 'cloudflare':
-                apiKey = settings.cloudflareApiKey; // Updated key name
-                accountId = settings.cloudflareId; // Updated key name
+                apiKey = settings.cloudflareApiKey;
+                accountId = settings.cloudflareId;
                 model = settings.custom_model;
                 break;
         }
@@ -227,7 +226,6 @@ async function makeApiCall(systemPrompt, prePrompt, textInput, callback) {
             throw new Error(`API key not found for platform: ${settings.platform}`);
         }
 
-        // Add logging for debugging
         console.log('Platform:', platform);
         console.log('Handler Key:', handlerKey);
         console.log('API Key exists:', !!apiKey);
@@ -331,6 +329,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 sendResponse({ error: { message: error.message, details: error.toString() } });
             }
         })();
-        return true; // Required to use sendResponse asynchronously
+        return true;
     }
 });

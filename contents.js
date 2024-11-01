@@ -159,7 +159,6 @@ async function processImage(imageUrl, prompt) {
             console.log('Image fetched successfully. MIME type:', mimeType);
             console.log('Calling Gemini API...');
             
-            // Send message to background script
             const response = await new Promise((resolve, reject) => {
                 chrome.runtime.sendMessage({
                     action: 'processImage',

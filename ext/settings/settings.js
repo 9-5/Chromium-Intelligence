@@ -13,7 +13,6 @@ function populateModelDropdown(platform) {
     const customModelInput = document.getElementById('custom-model');
     const useSpecificModel = document.getElementById('use-specific-model');
     
-    // Clear existing options
     modelSelect.innerHTML = '';
     
     if (platformModels[platform] && platformModels[platform].length > 0) {
@@ -247,7 +246,6 @@ function loadSettings() {
         
         populateModelDropdown(items.platform);
         
-        // Set the model value after a short delay to ensure the dropdown has been populated
         setTimeout(() => {
             setModelValue(items.model);
         }, 0);
@@ -300,7 +298,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const targetSectionId = this.getAttribute('data-section');
             showSection(targetSectionId);
             
-            // Update active state
             navLinks.forEach(navLink => navLink.classList.remove('active'));
             this.classList.add('active');
         });
@@ -370,7 +367,6 @@ document.addEventListener('DOMContentLoaded', function() {
         testCloudflareButton.addEventListener('click', testCloudflareAPI);
     }
 
-    // Show initial section
     showSection('settings-section');
 });
 
