@@ -20,14 +20,17 @@ A powerful Chromium extension that leverages the multiple AI APIs to assist with
   - Professional Tone Conversion
   - Concise Rewrites
   - Text Summarization
+  - Sentiment Analysis [To be implemented at this point!]
 
-- **Image Analysis**:
-  - Image Description
-  - Object Detection
+## Image Analysis
+- **Image Description**: Generates a text description of the image content.
+- **Object Detection**: Identifies and labels objects present in the image. [To be implemented at this point!]
+- **Content Moderation**: Checks if the image contains explicit or unsafe content. [To be implemented at this point!]
 
-- **PDF Processing**:
-  - Extract Text from PDF
-  - Summarize PDF [Not implemented at this point!]
+## PDF Processing
+- **Text Extraction**: Extracts text content from PDF documents. [To be implemented at this point!]
+- **Summarization**: Generates summaries of PDF documents. [To be implemented at this point!]
+- **Translation**: Translates PDF content into different languages. [To be implemented at this point!]
 
 ## Privacy Notice
 

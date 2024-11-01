@@ -22,53 +22,14 @@ function populateModelDropdown(platform) {
             option.textContent = model;
             modelSelect.appendChild(option);
         });
-        customModelInput.disabled = true;
+        useSpecificModel.disabled = false;
     } else {
-        customModelInput.disabled = false;
-    }
-}
-
-function updateUI(items) {
-    const platformSelect = document.getElementById('platform');
-    if (items.platform) {
-        platformSelect.value = items.platform;
-        populateModelDropdown(items.platform);
+        useSpecificModel.disabled = true;
     }
 
-    const modelSelect = document.getElementById('model');
-    if (items.model) {
-        modelSelect.value = items.model;
-    }
-
-    const useSpecificModelCheckbox = document.getElementById('use-specific-model');
-     if (items.use_specific_model !== undefined) {
-        useSpecificModelCheckbox.checked = items.use_specific_model;
-    }
-
-    const customModelInput = document.getElementById('custom-model');
-    if (items.custom_model) {
-        customModelInput.value = items.custom_model;
-    }
-
-    const geminiApiKeyInput = document.getElementById('gemini-api-key');
-    if (items.geminiApiKey) {
-        geminiApiKeyInput.value = items.geminiApiKey;
-    }
-
-    const openrouterApiKeyInput = document.getElementById('openrouter-api-key');
-    if (items.openrouterApiKey) {
-        openrouterApiKeyInput.value = items.openrouterApiKey;
-    }
-
-    const cloudflareIdInput = document.getElementById('cloudflare-id');
-    if (items.cloudflareId) {
-        cloudflareIdInput.value = items.cloudflareId;
-    }
-
-    const cloudflareApiKeyInput = document.getElementById('cloudflare-api-key');
-    if (items.cloudflareApiKey) {
-        cloudflareApiKeyInput.value = items.cloudflareApiKey;
-    }
+    useSpecificModel.addEventListener('change', function() {
+        customModelInput.disabled = !this.checked;
+    });
 }
 
 function saveSettings() {
@@ -76,14 +37,14 @@ function saveSettings() {
     const model = document.getElementById('model').value;
     const useSpecificModel = document.getElementById('use-specific-model').checked;
     const customModel = document.getElementById('custom-model').value;
-    
+
     chrome.storage.sync.set({
-        'platform': platform,
-        'model': model,
-        'use_specific_model': useSpecificModel,
-        'custom_model': customModel
-    }, () => {
-        showNotification('Settings saved successfully!', 'success');
+        platform: platform,
+        model: model,
+        use_specific_model: useSpecificModel,
+        custom_model: customModel
+    }, function() {
+        showNotification('Settings saved!', 'success');
     });
 }
 
@@ -92,15 +53,30 @@ function saveAPIKeys() {
     const openrouterApiKey = document.getElementById('openrouter-api-key').value;
     const cloudflareId = document.getElementById('cloudflare-id').value;
     const cloudflareApiKey = document.getElementById('cloudflare-api-key').value;
-    
+
     chrome.storage.sync.set({
-        'geminiApiKey': geminiApiKey,
-        'openrouterApiKey': openrouterApiKey,
-        'cloudflareId': cloudflareId,
-        'cloudflareApiKey': cloudflareApiKey
-    }, () => {
-        showNotification('API Keys saved successfully!', 'success');
+        geminiApiKey: geminiApiKey,
+        openrouterApiKey: openrouterApiKey,
+        cloudflareId: cloudflareId,
+        cloudflareApiKey: cloudflareApiKey
+    }, function() {
+        showNotification('API Keys saved!', 'success');
     });
+}
+
+function showNotification(message, type = 'success') {
+    const notification = document.querySelector('.popup-notification');
+    notification.querySelector('.message').textContent = message;
+    notification.classList.remove('success', 'error', 'hiding');
+    notification.classList.add(type);
+    notification.style.display = 'flex';
+
+    setTimeout(() => {
+        notification.classList.add('hiding');
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 300);
+    }, 3000);
 }
 
 function testGeminiAPI() {
@@ -116,8 +92,11 @@ function testGeminiAPI() {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            prompt: "This is a test.",
-            contents: [{ parts: [{ text: "This is a test." }] }]
+            contents: [{
+                parts: [{
+                    text: "This is a test."
+                }]
+            }]
         })
     })
     .then(response => {
@@ -128,14 +107,14 @@ function testGeminiAPI() {
         }
     })
     .catch(error => {
-        showNotification('Error testing Gemini API: ' + error.message, 'error');
+        showNotification('Error testing Gemini API key.', 'error');
     });
 }
 
 function testOpenRouterAPI() {
     const apiKey = document.getElementById('openrouter-api-key').value;
     if (!apiKey) {
-        showNotification('Please enter your OpenRouter API key.', 'error');
+     showNotification('Please enter your OpenRouter API key.', 'error');
         return;
     }
 
@@ -158,4 +137,13 @@ function testOpenRouterAPI() {
         }
     })
     .catch(error => {
-        showNotification
+        showNotification('Error testing OpenRouter API key.', 'error');
+    });
+}
+
+function testCloudflareAPI() {
+    const accountId = document.getElementById('cloudflare-id').value;
+    const apiKey = document.getElementById('cloudflare-api-key').value;
+
+    if (!accountId || !apiKey) {
+        showNotification('Please enter your

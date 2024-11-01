@@ -21,9 +21,13 @@ function showPopup(content) {
 
     const copyButton = document.getElementById('copyButton');
     copyButton.addEventListener('click', () => {
-        const responseText = document.getElementById('responseText');
-        responseText.select();
-        document.execCommand('copy');
+        navigator.clipboard.writeText(content)
+            .then(() => {
+                console.log('Content copied to clipboard');
+            })
+            .catch(err => {
+                console.error('Failed to copy: ', err);
+            });
     });
 
     const closeButton = document.getElementById('closeButton');
@@ -33,63 +37,73 @@ function showPopup(content) {
 }
 
 function showPromptInput(fileUrl, fileType) {
-    let prompt = prompt("Enter your prompt:");
+    const popup = document.createElement('div');
+    popup.id = 'ai-assistant-prompt-input';
+    popup.innerHTML = `
+        <textarea id="customPrompt" placeholder="Enter your prompt here"></textarea>
+        <div class="button-container">
+            <button id="sendImageButton" class="solarized-button">Send Image</button>
+            <button id="closeButton" class="solarized-button">Close</button>
+        </div>
+    `;
+    document.body.appendChild(popup);
 
-    if (prompt) {
-        if (fileType === 'text') {
-            processText(fileUrl, prompt);
-        } else if (fileType === 'image') {
-            processImage(fileUrl, prompt);
+    const sendImageButton = document.getElementById('sendImageButton');
+    sendImageButton.addEventListener('click', async () => {
+        const customPrompt = document.getElementById('customPrompt').value;
+        const settings = await getSettings();
+        let apiKey = settings.geminiApiKey;
+        if (settings.platform === 'OpenRouter') {
+            apiKey = settings.openrouterApiKey;
+        } else if (settings.platform === 'Cloudflare Worker AI') {
+            apiKey = settings.cloudflareApiKey;
         }
-    }
-}
-
-async function processText(text, prompt) {
-    chrome.runtime.sendMessage({
-        action: 'processText',
-        data: { text: text, prompt: prompt }
-    }, (response) => {
-        if (response && response.data) {
-            showPopup(response.data);
-        } else if (response && response.error) {
-            showPopup(`Error: ${response.error.message}`);
-        } else {
-            showPopup('An unknown error occurred.');
-        }
-    });
-}
-
-async function processImage(imageUrl, prompt) {
-    try {
-        const { base64Content, mimeType } = await getImageData(imageUrl);
+        
         chrome.runtime.sendMessage({
             action: 'processImage',
-            data: { base64Content: base64Content, mimeType: mimeType, prompt: prompt }
-        }, (response) => {
+            data: {
+                base64Content: fileUrl,
+                mimeType: fileType,
+                prompt: customPrompt,
+                apiKey: apiKey
+            }
+        }, response => {
             if (response && response.data) {
                 showPopup(response.data);
             } else if (response && response.error) {
+                console.error('Error processing image:', response.error);
                 showPopup(`Error: ${response.error.message}`);
             } else {
-                showPopup('An unknown error occurred.');
+                console.error('Unknown error occurred');
+                showPopup('Unknown error occurred');
             }
+            popup.remove();
         });
-    } catch (error) {
-        showPopup(`Error: ${error.message}`);
-    }
+    });
+
+    const closeButton = document.getElementById('closeButton');
+    closeButton.addEventListener('click', () => {
+        popup.remove();
+    });
 }
 
 async function getImageData(imageUrl) {
     try {
         const response = await fetch(imageUrl);
         const blob = await response.blob();
-        const mimeType = blob.type;
+        return await readFileAsDataURL(blob);
+    } catch (error) {
+        throw new Error(`Failed to fetch image: ${error.message}`);
+    }
+}
 
+async function readFileAsDataURL(blob) {
+    try {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 const base64Content = reader.result.split(',')[1];
-                resolve({ base64Content, mimeType });
+                resolve({ base64Content, mimeType: blob.type });
             };
             reader.onerror = reject;
             reader.readAsDataURL(blob);

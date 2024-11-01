@@ -29,26 +29,40 @@
         label {
             display: block;
             margin-bottom: 5px;
+            color: #839496;
+        }
+        button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
         }
         .solarized-button {
             background-color: #268bd2;
-            color: #fdf6e3;
-            border: none;
-            padding: 8px 12px;
-            margin-top: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+            color: white;
         }
-        .solarized-button:hover {
-            background-color: #2aa198;
+        .button-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+        #responseText {
+            width: 96%;
+            height: 150px;
+            padding: 5px;
+            margin-bottom: 10px;
+            background-color: #073642;
+            color: #839496;
+            border: 1px solid #268bd2;
+            resize: none;
         }
         .settings-link {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
             color: #268bd2;
             text-decoration: none;
-        }
-        .settings-link:hover {
-            text-decoration: underline;
         }
     </style>
 </head>

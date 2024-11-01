@@ -21,10 +21,12 @@
                 <option value="Cloudflare Worker AI">Cloudflare Worker AI</option>
                 <option value="OpenRouter">OpenRouter</option>
             </select>
-            <label for="model">Model</label>
-            <select id="model"></select>
             
-            <label for="use-specific-model">Use Specific Model</label>
+            <label for="model">Model</label>
+            <select id="model">
+            </select>
+
+            <label for="use-specific-model">Use Specific Model?</label>
             <input type="checkbox" id="use-specific-model">
 
             <label for="custom-model">Custom Model</label>
@@ -35,18 +37,22 @@
         <div id="api-keys-section" class="section" style="display: none;">
             <h2>API Keys</h2>
             <div class="input-group">
-                <label class="small-label" for="gemini-api-key">Gemini API Key</label>
-                <input type="password" id="gemini-api-key">
-                <i class="fas fa-eye toggle-visibility" id="toggle-gemini-api-key"></i>
+                <label for="gemini-api-key">Gemini API Key</label>
+                <div class="api-key-input">
+                    <input type="password" id="gemini-api-key">
+                    <i class="fas fa-eye toggle-visibility" id="toggle-gemini-api-key"></i>
+                </div>
+                <button id="test-gemini" class="solarized-button test-button">Test</button>
             </div>
-            <button id="test-gemini" class="solarized-button test-button">Test</button>
 
             <div class="input-group">
-                <label class="small-label" for="openrouter-api-key">OpenRouter API Key</label>
-                <input type="password" id="openrouter-api-key">
-                <i class="fas fa-eye toggle-visibility" id="toggle-openrouter-api-key"></i>
+                <label for="openrouter-api-key">OpenRouter API Key</label>
+                <div class="api-key-input">
+                    <input type="password" id="openrouter-api-key">
+                    <i class="fas fa-eye toggle-visibility" id="toggle-openrouter-api-key"></i>
+                </div>
+                <button id="test-openrouter" class="solarized-button test-button">Test</button>
             </div>
-            <button id="test-openrouter" class="solarized-button test-button">Test</button>
 
             <div class="cloudflare-group">
                 <div class="input-group">
@@ -66,6 +72,11 @@
             <h2>About</h2>
             <p>Developed by John Le, 0KB.ORG.</p>
         </div>
+    </div>
+    <div class="popup-notification" style="display: none;">
+        <i class="fas fa-check-circle"></i>
+        <span class="message"></span>
+        <span class="close-btn">&times;</span>
     </div>
     <script src="settings.js"></script>
 </body>
