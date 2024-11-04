@@ -7,100 +7,125 @@ const aiAssistantPrompts = {
         'Rewrite this:\n\n',
         'You are a writing assistant. Rewrite the text provided by the user to improve phrasing. Output ONLY the rewritten text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
     ],
-    'Friendly Tone': [
-        'Make this sound friendly:\n\n',
-        'You are a writing assistant. Rewrite the text provided by the user to make it sound more friendly. Output ONLY the rewritten text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
+    'Make Friendly': [
+        'Make this sound more friendly:\n\n',
+        'You are a writing assistant. You will make the text provided more friendly. Output ONLY the rewritten text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
     ],
-    'Professional Tone': [
-        'Make this sound professional:\n\n',
-        'You are a writing assistant. Rewrite the text provided by the user to make it sound more professional. Output ONLY the rewritten text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
+    'Make Professional': [
+        'Make this sound more professional:\n\n',
+        'You are a writing assistant. You will make the text provided more professional. Output ONLY the rewritten text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
     ],
-    'Concise Rewrite': [
-        'Rewrite this concisely:\n\n',
-        'You are a writing assistant. Rewrite the text provided by the user to make it more concise. Output ONLY the rewritten text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
+    'Make Concise': [
+        'Make this more concise:\n\n',
+        'You are a writing assistant. You will rewrite the text to be more concise. Output ONLY the rewritten text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
     ],
     'Summarize': [
         'Summarize this:\n\n',
-        'You are a summarization assistant. Summarize the text provided by the user. Output ONLY the summarized text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
+        'You are a summarization assistant. You will create a summary of the text provided. Output ONLY the summary text without any additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
     ]
 };
 
 chrome.contextMenus.create({
+    id: "ai-assistant-text",
+    title: "AI Assistant: %s",
+    contexts: ["selection"]
+});
+
+chrome.contextMenus.create({
     id: "ai-assistant-image",
-    title: "Analyze Image with AI",
+    title: "AI Assistant: Analyze Image",
     contexts: ["image"]
 });
 
+chrome.contextMenus.create({
+    id: "ai-assistant-pdf",
+    title: "AI Assistant: Process PDF",
+    contexts: ["link"],
+    documentUrlPatterns: ["*://*.pdf"]
+});
+
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-    if (info.menuItemId === "ai-assistant-image") {
+    if (info.menuItemId === "ai-assistant-text") {
         chrome.scripting.executeScript({
             target: { tabId: tab.id },
-            function: getImageData,
-            args: [info.srcUrl]
+            function: getSettings
+        }, (results) => {
+            if (chrome.runtime.lastError) {
+                console.error("Error:", chrome.runtime.lastError);
+                return;
+            }
+            const settings = results[0].result;
+            const selectedText = info.selectionText;
+            chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                function: showPromptInput,
+                args: [selectedText, 'text']
+            });
+        });
+    } else if (info.menuItemId === "ai-assistant-image") {
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            function: getSettings
+        }, (results) => {
+            if (chrome.runtime.lastError) {
+                console.error("Error:", chrome.runtime.lastError);
+                return;
+            }
+            const settings = results[0].result;
+            const imageUrl = info.srcUrl;
+            chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                function: fetchImageAndShowPrompt,
+                args: [imageUrl]
+            });
+        });
+    } else if (info.menuItemId === "ai-assistant-pdf") {
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            function: getSettings
+        }, (results) => {
+            if (chrome.runtime.lastError) {
+                console.error("Error:", chrome.runtime.lastError);
+                return;
+            }
+            const settings = results[0].result;
+            const fileUrl = info.linkUrl;
+            chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                function: showPromptInput,
+                args: [fileUrl, 'pdf']
+            });
         });
     }
 });
 
-async function getImageData(imageUrl) {
-    try {
-        const response = await fetch(imageUrl);
-        const blob = await response.blob();
-        const { base64Content, mimeType } = await readFileAsDataURL(blob);
-        
-        chrome.runtime.sendMessage({
-            action: 'showPromptInput',
-            fileUrl: base64Content,
-            fileType: mimeType
-        });
-
-        async function readFileAsDataURL(blob) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    const base64Content = reader.result.split(',')[1];
-                    const mimeType = reader.result.split(';')[0].split(':')[1];
-                    resolve({ base64Content, mimeType });
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-            });
-        }
-    } catch (error) {
-        console.error("Error fetching image:", error);
-    }
-}
-
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'textRequest') {
+    if (request.action === 'performAiAction') {
         (async () => {
             try {
-                const { selectedText, prompt } = request.data;
-                const settings = await new Promise((resolve) => {
-                    chrome.storage.sync.get([
-                        'platform',
-                        'model',
-                        'use_specific_model',
-                        'custom_model',
-                        'geminiApiKey',
-                        'openrouterApiKey',
-                        'cloudflareId',
-                        'cloudflareApiKey'
-                    ], resolve);
-                });
-                let apiKey = settings.geminiApiKey;
-                if (settings.platform === 'OpenRouter') {
-                    apiKey = settings.openrouterApiKey;
-                } else if (settings.platform === 'Cloudflare Worker AI') {
-                    apiKey = settings.cloudflareApiKey;
+                const { selectedText, prompt, apiKey, platform, model, useSpecificModel, customModel } = request.data;
+                let apiHandler;
+                if (platform === 'Gemini') {
+                    apiHandler = apiHandlers.gemini;
+                } else if (platform === 'Cloudflare Worker AI') {
+                    apiHandler = apiHandlers.cloudflare;
+                }
+                else if (platform === 'OpenRouter') {
+                    apiHandler = apiHandlers.openrouter;
+                } else {
+                    sendResponse({ error: 'Invalid platform specified.' });
+                    return;
                 }
 
-                const fullPrompt = aiAssistantPrompts[prompt][0] + selectedText + '\n\n' + aiAssistantPrompts[prompt][1];
-                const response = await apiHandlers.gemini.processText(
-                    fullPrompt,
-                    settings.platform,
-                    settings.model,
-                    settings.use_specific_model ? settings.custom_model : null,
-                    apiKey
+                const [systemPrompt, userPrompt] = aiAssistantPrompts[prompt];
+                const response = await apiHandler.processText(
+                    selectedText,
+                    systemPrompt,
+                    userPrompt,
+                    apiKey,
+                    model,
+                    useSpecificModel,
+                    customModel
                 );
                 sendResponse({ data: response });
             } catch (error) {

@@ -21,39 +21,30 @@
                 <option value="Cloudflare Worker AI">Cloudflare Worker AI</option>
                 <option value="OpenRouter">OpenRouter</option>
             </select>
-            
             <label for="model">Model</label>
-            <select id="model">
-            </select>
-
-            <label for="use-specific-model">Use Specific Model?</label>
+            <select id="model"></select>
+            
+            <label for="use-specific-model">Use Custom Model</label>
             <input type="checkbox" id="use-specific-model">
 
             <label for="custom-model">Custom Model</label>
             <input type="text" id="custom-model" disabled>
-            
             <button id="save-settings" class="solarized-button">Save Settings</button>
         </div>
         <div id="api-keys-section" class="section" style="display: none;">
             <h2>API Keys</h2>
             <div class="input-group">
                 <label for="gemini-api-key">Gemini API Key</label>
-                <div class="api-key-input">
-                    <input type="password" id="gemini-api-key">
-                    <i class="fas fa-eye toggle-visibility" id="toggle-gemini-api-key"></i>
-                </div>
+                <input type="password" id="gemini-api-key">
+                <i class="fas fa-eye toggle-visibility" id="toggle-gemini-api-key"></i>
                 <button id="test-gemini" class="solarized-button test-button">Test</button>
             </div>
-
             <div class="input-group">
                 <label for="openrouter-api-key">OpenRouter API Key</label>
-                <div class="api-key-input">
-                    <input type="password" id="openrouter-api-key">
-                    <i class="fas fa-eye toggle-visibility" id="toggle-openrouter-api-key"></i>
-                </div>
+                <input type="password" id="openrouter-api-key">
+                <i class="fas fa-eye toggle-visibility" id="toggle-openrouter-api-key"></i>
                 <button id="test-openrouter" class="solarized-button test-button">Test</button>
             </div>
-
             <div class="cloudflare-group">
                 <div class="input-group">
                     <label class="small-label" for="cloudflare-id">Account ID</label>
