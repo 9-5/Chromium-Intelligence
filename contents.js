@@ -166,7 +166,7 @@ async function processImage(imageUrl, prompt) {
                         base64Content,
                         mimeType,
                         prompt,
-                        apiKey: settings.gemini_api_key
+                        apiKey: settings.geminiApiKey
                     }
                 }, response => {
                     if (chrome.runtime.lastError) {
@@ -208,7 +208,7 @@ async function processPDF(pdfUrl, prompt) {
                 base64Content,
                 'application/pdf',
                 prompt,
-                settings.gemini_api_key
+                settings.geminiApiKey
             );
             showPopup(result);
         } catch (error) {
@@ -249,10 +249,10 @@ function getSettings() {
             'model',
             'use_specific_model',
             'custom_model',
-            'gemini_api_key',
-            'openrouter_api_key',
-            'cloudflare_id',
-            'cloudflare_api_key'
+            'geminiApiKey',
+            'openrouterApiKey',
+            'cloudflareId',
+            'cloudflareApiKey'
         ], resolve);
     });
 }
