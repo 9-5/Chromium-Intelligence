@@ -21,12 +21,13 @@ function showPopup(content) {
 
     const copyButton = document.getElementById('copyButton');
     copyButton.addEventListener('click', () => {
-        navigator.clipboard.writeText(content)
+        const responseText = document.getElementById('responseText');
+        navigator.clipboard.writeText(responseText.value)
             .then(() => {
-                console.log('Content copied to clipboard');
+                console.log('Text copied to clipboard');
             })
             .catch(err => {
-                console.error('Failed to copy: ', err);
+                console.error('Failed to copy text: ', err);
             });
     });
 
@@ -40,11 +41,10 @@ function showPromptInput(fileUrl, fileType) {
     const promptInput = document.createElement('div');
     promptInput.id = 'ai-assistant-prompt-input';
     promptInput.innerHTML = `
-        <label for="promptText">Enter your prompt:</label>
-        <input type="text" id="promptText" name="promptText">
+        <textarea id="promptText" placeholder="Enter your prompt here"></textarea>
         <div class="button-container">
             <button id="sendButton" class="solarized-button">Send</button>
-            <button id="cancelButton" class="solarized-button">Cancel</button>
+            <button id="closeButton" class="solarized-button">Close</button>
         </div>
     `;
     document.body.appendChild(promptInput);
@@ -52,128 +52,28 @@ function showPromptInput(fileUrl, fileType) {
     const sendButton = document.getElementById('sendButton');
     sendButton.addEventListener('click', () => {
         const promptText = document.getElementById('promptText').value;
+        processFile(fileUrl, fileType, promptText);
         promptInput.remove();
-
-        if (fileType === 'image') {
-            fetchImage(fileUrl)
-                .then(({ base64Content, mimeType }) => {
-                    getSettings().then(settings => {
-                        chrome.runtime.sendMessage({
-                            action: 'processImage',
-                            data: {
-                                base64Content: base64Content,
-                                mimeType: mimeType,
-                                prompt: promptText,
-                                apiKey: settings.geminiApiKey
-                            }
-                        }, (response) => {
-                            if (response.data) {
-                                showPopup(response.data);
-                            } else if (response.error) {
-                                showPopup(`Error: ${response.error.message}`);
-                            }
-                        });
-                    });
-                })
-                .catch(error => {
-                    console.error("Error fetching image:", error);
-                    showPopup(`Error fetching image: ${error.message}`);
-                });
-        } else if (fileType === 'pdf') {
-            fetchPDFText(fileUrl)
-            .then(pdfText => {
-                getSettings().then(settings => {
-                    chrome.runtime.sendMessage({
-                        action: 'performAiAction',
-                        data: {
-                            selectedText: pdfText,
-                            prompt: 'Summarize',
-                            apiKey: settings.geminiApiKey,
-                            platform: settings.platform,
-                            model: settings.model,
-                            useSpecificModel: settings.use_specific_model,
-                            customModel: settings.custom_model
-                        }
-                    }, (response) => {
-                        if (response.data) {
-                            showPopup(response.data);
-                        } else if (response.error) {
-                            showPopup(`Error: ${response.error.message}`);
-                        }
-                    });
-                });
-            })
-            .catch(error => {
-                console.error("Error fetching PDF:", error);
-                showPopup(`Error fetching PDF: ${error.message}`);
-            });
-        } else {
-            getSettings().then(settings => {
-                chrome.runtime.sendMessage({
-                    action: 'performAiAction',
-                    data: {
-                        selectedText: fileUrl,
-                        prompt: promptText,
-                        apiKey: settings.geminiApiKey,
-                        platform: settings.platform,
-                        model: settings.model,
-                        useSpecificModel: settings.use_specific_model,
-                        customModel: settings.custom_model
-                    }
-                }, (response) => {
-                    if (response.data) {
-                        showPopup(response.data);
-                    } else if (response.error) {
-                        showPopup(`Error: ${response.error.message}`);
-                    }
-                });
-            });
-        }
     });
 
-    const cancelButton = document.getElementById('cancelButton');
-    cancelButton.addEventListener('click', () => {
+    const closeButton = document.getElementById('closeButton');
+    closeButton.addEventListener('click', () => {
         promptInput.remove();
     });
 }
 
-async function fetchPDFText(url) {
+async function processFile(fileUrl, fileType, prompt) {
     try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const buffer = await response.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument(buffer).promise;
-        let text = "";
-        for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const content = await page.getTextContent();
-            const strings = content.items.map(item => item.str);
-            text += strings.join(" ") + "\n";
-        }
-        return text;
+        const { base64Content, mimeType } = await getBase64(fileUrl);
+        chrome.runtime.sendMessage({ action: 'processImage', data: { base64Content, mimeType, prompt } });
     } catch (error) {
-        throw new Error(`Failed to fetch or process PDF: ${error.message}`);
+        console.error("Error processing file:", error);
     }
 }
 
-async function fetchImageAndShowPrompt(imageUrl) {
+async function getBase64(fileUrl) {
     try {
-        const { base64Content, mimeType } = await fetchImage(imageUrl);
-        showPromptInput(imageUrl, 'image');
-    } catch (error) {
-        console.error("Error fetching image:", error);
-        showPopup(`Error fetching image: ${error.message}`);
-    }
-}
-
-async function fetchImage(imageUrl) {
-    try {
-        const response = await fetch(imageUrl);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        const response = await fetch(fileUrl);
         const blob = await response.blob();
         return new Promise((resolve, reject) => {
             const reader = new FileReader();

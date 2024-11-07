@@ -48,39 +48,62 @@ body {
     margin-top: 10px;
 }
 
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: #839496;
+}
+
+select, input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    background-color: #073642;
+    color: #839496;
+    border: 1px solid #268bd2;
+    box-sizing: border-box;
+}
+
+input[type="checkbox"] {
+    width: auto;
+    margin-right: 5px;
+    display: inline-block;
+}
+
 .input-group {
-    margin-bottom: 20px;
+    position: relative;
+    margin-bottom: 15px;
 }
 
 .input-group label {
-    display: block;
     margin-bottom: 5px;
-    color: #93a1a1;
+    color: #839496;
+    display: block;
 }
 
 .input-group input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #586e75;
-    background-color: #073642;
-    color: #839496;
-    border-radius: 4px;
+    padding-right: 30px; /* Space for the eye icon */
 }
 
-.input-group input:focus {
-    outline: none;
-    border-color: #268bd2;
-    box-shadow: 0 0 5px rgba(38, 139, 210, 0.5);
+.toggle-visibility {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #839496;
 }
 
 .solarized-button {
     background-color: #268bd2;
     color: #fdf6e3;
-    padding: 10px 15px;
     border: none;
-    border-radius: 4px;
+    padding: 10px 15px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15px;
 }
 
 .solarized-button:hover {
@@ -88,24 +111,7 @@ body {
 }
 
 .section {
-    margin-bottom: 20px;
-}
-
-.section h2 {
-    color: #268bd2;
-    border-bottom: 2px solid #268bd2;
-    padding-bottom: 5px;
-    margin-bottom: 15px;
-}
-
-.toggle-visibility {
-    cursor: pointer;
-    margin-left: 5px;
-    color: #586e75;
-}
-
-.toggle-visibility:hover {
-    color: #839496;
+    display: none;
 }
 
 .popup-notification {
@@ -113,10 +119,10 @@ body {
     top: 20px;
     right: 20px;
     background-color: #073642;
-    color: #fdf6e3;
+    color: #839496;
     padding: 15px;
     border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
     gap: 10px;
@@ -179,5 +185,4 @@ body {
 }
 
 .popup-notification.hiding {
-    animation: slideOut 0.3s ease-in forwards;
-}
+    animation: slideOut 0.3s ease-

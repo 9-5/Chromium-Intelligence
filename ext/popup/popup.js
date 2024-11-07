@@ -29,23 +29,13 @@ function updateUI(items) {
         platformSelect.value = items.platform || 'Gemini';
         populateModelDropdown(items.platform || 'Gemini');
     }
-
-    const modelSelect = document.getElementById('model');
-    if (modelSelect) {
-        modelSelect.value = items.model || platformModels['Gemini'][0];
-    }
-
-    const customModelInput = document.getElementById('custom-model');
-    if (customModelInput) {
-        customModelInput.value = items.custom_model || '';
-    }
 }
 
 function saveSettings() {
     const platform = document.getElementById('platform').value;
     const model = document.getElementById('model').value;
     const customModel = document.getElementById('custom-model').value;
-    
+
     chrome.storage.sync.set({
         platform: platform,
         model: model,
