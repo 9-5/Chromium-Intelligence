@@ -25,39 +25,8 @@ function populateModelDropdown(platform) {
 function updateUI(items) {
     const platformSelect = document.getElementById('platform');
     
-    if (platformSelect) {
-        platformSelect.value = items.platform || 'Gemini';
-        populateModelDropdown(items.platform || 'Gemini');
-    }
-}
-
-function saveSettings() {
-    const platform = document.getElementById('platform').value;
-    const model = document.getElementById('model').value;
-    const customModel = document.getElementById('custom-model').value;
-
-    chrome.storage.sync.set({
-        platform: platform,
-        model: model,
-        custom_model: customModel
-    }, function() {
-        console.log('Settings saved');
-    });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    chrome.storage.sync.get([
-        'platform',
-        'model',
-        'custom_model'
-    ], updateUI);
-
-    const platformSelect = document.getElementById('platform');
-    if (platformSelect) {
-        platformSelect.addEventListener('change', handlePlatformChange);
-    }
-
-    const saveButton = document.getElementById('save-popup-settings');
+... (FILE CONTENT TRUNCATED) ...
+veButton = document.getElementById('save-popup-settings');
     if (saveButton) {
         saveButton.addEventListener('click', saveSettings);
     }

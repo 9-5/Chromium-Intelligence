@@ -20,31 +20,12 @@ A powerful Chromium extension that leverages the multiple AI APIs to assist with
   - Professional Tone Conversion
   - Concise Rewrites
   - Text Summarization
-  - Translation [Coming Soon!]
-  - Sentiment Analysis [Coming Soon!]
+  - Sentiment Analysis [Implementation at this point!]
 
-- **Image Analysis**:
-  - Object Detection [Coming Soon!]
-  - Image Captioning
-  - Visual Question Answering [Coming Soon!]
-
-- **PDF Processing**:
-  - Summarization
-  - Text Extraction [Coming Soon!]
-
-## Installation
-
-1. Clone this repository.
-2. Open Chrome and navigate to `chrome://extensions/`.
-3. Enable "Developer mode" in the top right corner.
-4. Click "Load unpacked" and select the directory where you cloned the repository.
-5. Go to extension options page to provide the api key and other settings!
-
-## Usage
-
-1. **Text Operations**: Simply select any text on a webpage, right-click, and choose from the context menu to perform operations like proofreading, rewriting, or summarizing.
-2. **Image Analysis**: Right-click on any image, select "Analyze Image," and choose an analysis option like "Caption Image."  [Still Experimental at this point!]
-3. **PDF Processing**: Right-click on a PDF link, select "Process PDF," and choose an operation like "Summarize PDF." [Still Experimental at this point!]
+## PDF Processing
+- **PDF Summarization**: Summarize the content of a PDF
+- **PDF to Text Conversion**: Extract text content from a PDF.
+- **PDF Translation**: Translate the content of a PDF.
 
 ## Privacy Notice
 

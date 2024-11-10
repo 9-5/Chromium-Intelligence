@@ -3,6 +3,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         showPopup(request.data);
     } else if (request.action === 'showPromptInput') {
         showPromptInput(request.fileUrl, request.fileType);
+    } else if (request.action === 'processPdf') {
+        processPdf(request.fileUrl, request.prompt);
     }
     return true;
 });
@@ -17,89 +19,38 @@ function showPopup(content) {
             <button id="closeButton" class="solarized-button">Close</button>
         </div>
     `;
-    document.body.appendChild(popup);
-
-    const copyButton = document.getElementById('copyButton');
-    copyButton.addEventListener('click', () => {
-        const responseText = document.getElementById('responseText');
-        navigator.clipboard.writeText(responseText.value)
-            .then(() => {
-                console.log('Text copied to clipboard');
-            })
-            .catch(err => {
-                console.error('Failed to copy text: ', err);
-            });
-    });
-
-    const closeButton = document.getElementById('closeButton');
-    closeButton.addEventListener('click', () => {
-        popup.remove();
-    });
-}
-
-function showPromptInput(fileUrl, fileType) {
-    const promptInput = document.createElement('div');
-    promptInput.id = 'ai-assistant-prompt-input';
-    promptInput.innerHTML = `
-        <textarea id="promptText" placeholder="Enter your prompt here"></textarea>
-        <div class="button-container">
-            <button id="sendButton" class="solarized-button">Send</button>
-            <button id="closeButton" class="solarized-button">Close</button>
-        </div>
-    `;
-    document.body.appendChild(promptInput);
-
-    const sendButton = document.getElementById('sendButton');
-    sendButton.addEventListener('click', () => {
-        const promptText = document.getElementById('promptText').value;
-        processFile(fileUrl, fileType, promptText);
-        promptInput.remove();
-    });
-
-    const closeButton = document.getElementById('closeButton');
-    closeButton.addEventListener('click', () => {
-        promptInput.remove();
-    });
-}
-
-async function processFile(fileUrl, fileType, prompt) {
-    try {
-        const { base64Content, mimeType } = await getBase64(fileUrl);
-        chrome.runtime.sendMessage({ action: 'processImage', data: { base64Content, mimeType, prompt } });
-    } catch (error) {
-        console.error("Error processing file:", error);
+    document.body.appendC
+... (FILE CONTENT TRUNCATED) ...
+        const downloadLink = document.createElement('a');
+        downloadLink.href = fileUrl;
+        downloadLink.download = `downloaded_file.${fileType}`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
     }
 }
 
-async function getBase64(fileUrl) {
+async function processPdf(fileUrl, prompt) {
     try {
+        const settings = await getSettings();
+        const apiKey = settings.geminiApiKey;
+
         const response = await fetch(fileUrl);
         const blob = await response.blob();
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64Content = reader.result.split(',')[1];
-                resolve({ base64Content, mimeType: blob.type });
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
+        const arrayBuffer = await blob.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+
+        chrome.runtime.sendMessage({
+            action: 'processPdf',
+            data: { fileContent: uint8Array, prompt, apiKey }
         });
     } catch (error) {
-        throw new Error(`Failed to fetch image: ${error.message}`);
+        console.error("Error processing PDF:", error);
     }
 }
 
-function getSettings() {
-    return new Promise((resolve) => {
-        chrome.storage.sync.get([
-            'platform',
-            'model',
-            'use_specific_model',
-            'custom_model',
-            'geminiApiKey',
-            'openrouterApiKey',
-            'cloudflareId',
-            'cloudflareApiKey'
-        ], resolve);
-    });
+async function getImageBase64(fileUrl, fileType) {
+    try {
+   
+... (FILE CONTENT TRUNCATED) ...
 }

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chromium Intelligence</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+    <div class="navbar">
+        <img src="..\logo.png" alt="Logo" class="logo">
+        <a href="#" class="active" data-section="settings-section">Settings</a>
+        <a href="#" data-section="api-keys-section">API Keys</a>
+        <a href="#" data-section="about-section">About</a>
+    </div>
+    <div class="container">
+        <div id="settings-section" class="section settings-section">
+            <h2>AI Settings</h2>
+            <label for="platform">Platform</label>
+            <select id="platf
+... (FILE CONTENT TRUNCATED) ...
+  <div class="input-group">
+                    <label class="small-label" for="cloudflare-api-key">API Key</label>
+                    <input type="password" id="cloudflare-api-key">
+                    <i class="fas fa-eye toggle-visibility" id="toggle-cloudflare-api-key"></i>
+                </div>
+                <button id="test-cloudflare" class="solarized-button test-button">Test</button>
+            </div>
+            <button id="save-api-keys" class="solarized-button">Save API Keys</button>
+        </div>
+        <div id="about-section" class="section" style="display: none;">
+            <h2>About</h2>
+            <p>Developed by John Le, 0KB.ORG.</p>
+        </div>
+    </div>
+    <script src="settings.js"></script>
+</body>
+</html>
