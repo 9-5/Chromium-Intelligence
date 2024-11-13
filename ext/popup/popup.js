@@ -25,8 +25,45 @@ function populateModelDropdown(platform) {
 function updateUI(items) {
     const platformSelect = document.getElementById('platform');
     
-... (FILE CONTENT TRUNCATED) ...
-veButton = document.getElementById('save-popup-settings');
+    if (items.platform) {
+        platformSelect.value = items.platform;
+        populateModelDropdown(items.platform);
+    }
+
+    const modelSelect = document.getElementById('model');
+     if (items.model) {
+        modelSelect.value = items.model;
+    }
+}
+
+async function saveSettings() {
+    const platformSelect = document.getElementById('platform');
+    const modelSelect = document.getElementById('model');
+    
+    const platform = platformSelect.value;
+    const model = modelSelect.value;
+    
+    chrome.storage.sync.set({
+        platform: platform,
+        model: model
+    }, function() {
+        console.log('Settings saved');
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    chrome.storage.sync.get([
+        'platform',
+        'model',
+        'custom_model'
+    ], updateUI);
+
+    const platformSelect = document.getElementById('platform');
+    if (platformSelect) {
+        platformSelect.addEventListener('change', handlePlatformChange);
+    }
+
+    const saveButton = document.getElementById('save-popup-settings');
     if (saveButton) {
         saveButton.addEventListener('click', saveSettings);
     }

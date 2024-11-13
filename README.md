@@ -20,12 +20,20 @@ A powerful Chromium extension that leverages the multiple AI APIs to assist with
   - Professional Tone Conversion
   - Concise Rewrites
   - Text Summarization
-  - Sentiment Analysis [Implementation at this point!]
+- **Image Analysis**: Ability to analyze and extract information from images directly through the context menu.
+- **PDF Processing**:
+  - Summarize the content of a PDF.
+  - Ability to ask any question regarding the content of a PDF.
 
-## PDF Processing
-- **PDF Summarization**: Summarize the content of a PDF
-- **PDF to Text Conversion**: Extract text content from a PDF.
-- **PDF Translation**: Translate the content of a PDF.
+## Usage
+
+1.  Install the extension from the Chrome Web Store (once available).
+2.  Navigate to any webpage.
+3.  Right-click on selected text, images, or a PDF link.
+4.  Choose an AI operation from the context menu.
+5.  View the results in a popup window.
+
+[More detailed instructions and screenshots coming at this point!]
 
 ## Privacy Notice
 
