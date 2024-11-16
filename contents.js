@@ -17,72 +17,9 @@ function showPopup(content) {
             <button id="closeButton" class="solarized-button">Close</button>
         </div>
     `;
-    document.body.appendChild(popup);
-
-    const copyButton = document.getElementById('copyButton');
-    copyButton.addEventListener('click', () => {
-        const responseText = document.getElementById('responseText');
-        responseText.select();
-        document.execCommand('copy');
-    });
-
-    const closeButton = document.getElementById('closeButton');
-    closeButton.addEventListener('click', () => {
-        document.body.removeChild(popup);
-    });
-}
-
-async function showPromptInput(fileUrl, fileType) {
-    const prompt = window.prompt("Enter your prompt:", "Describe this image");
-    if (prompt) {
-        if (fileType === 'text') {
-            processText(fileUrl, prompt);
-        }
-        if (fileType === 'image') {
-            processImage(fileUrl, prompt);
-        }
-    }
-}
-
-async function processText(text, prompt) {
-    try {
-        const settings = await getSettings();
-        const apiKey = settings.geminiApiKey;
-
-        chrome.runtime.sendMessage({
-            action: 'processText',
-            data: { text: text, prompt: prompt, apiKey: apiKey }
-        });
-    } catch (error) {
-        console.error("Error processing text:", error);
-    }
-}
-
-async function processImage(fileUrl, prompt) {
-    try {
-        const settings = await getSettings();
-        const apiKey = settings.geminiApiKey;
-
-        const { base64Content, mimeType } = await getImageBase64(fileUrl);
-
-        chrome.runtime.sendMessage({
-            action: 'processImage',
-            data: { base64Content, mimeType, prompt, apiKey }
-        });
-
-    } catch (error) {
-        console.error("Error processing image:", error);
-    }
-}
-
-async function getImageBase64(fileUrl) {
-    try {
-        const response = await fetch(fileUrl);
-        const blob = await response.blob();
-        const mimeType = blob.type;
-
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
+    document.body.appendC
+... (FILE CONTENT TRUNCATED) ...
+ const reader = new FileReader();
             reader.onloadend = () => {
                 const base64Content = reader.result.split(',')[1];
                 resolve({ base64Content, mimeType });

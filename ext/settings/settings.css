@@ -45,87 +45,84 @@ body {
 }
 
 .cloudflare-group .test-button {
-    margin-top: 10px;
-}
-
-.section {
-    margin-bottom: 20px;
-}
-
-h2 {
-    color: #268bd2;
-    margin-bottom: 15px;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
+  
+... (FILE CONTENT TRUNCATED) ...
+ss i {
     color: #2aa198;
 }
 
-input[type="text"],
-input[type="password"],
-select {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    background-color: #073642;
-    color: #839496;
-    border: 1px solid #268bd2;
-    box-sizing: border-box;
+.popup-notification.error i {
+    color: #dc322f;
 }
 
-input[type="checkbox"] {
-    margin-right: 5px;
+.popup-notification .message {
+    flex-grow: 1;
 }
 
-button.solarized-button {
-    background-color: #002b36;
-    color: #268bd2;
-    border: 1px solid #268bd2;
-    padding: 8px 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-button.solarized-button:hover {
-    background-color: #268bd2;
-    color: #002b36;
-}
-
-.input-group {
-    position: relative;
-    margin-bottom: 10px;
-}
-
-.input-group i {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
+.popup-notification .close-btn {
     color: #586e75;
+    cursor: pointer;
+    padding: 5px;
+    margin: -5px;
+    transition: color 0.2s;
 }
 
-.popup-notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background-color: #073642;
+.popup-notification .close-btn:hover {
     color: #839496;
-    border: 1px solid #268bd2;
-    padding: 10px 20px;
-    border-radius: 5px;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.popup-notification.hiding {
+    animation: slideOut 0.3s ease-in forwards;
+}
+
+.api-status {
     display: flex;
     align-items: center;
-    gap: 10px;
-    z-index: 1000;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    animation: slideIn 0.3s ease-in forwards;
+    margin-bottom: 10px;
 }
 
-.popup-notification i {
-    font-size: 20px;
+.api-status label {
+    margin-right: 10px;
 }
 
-.popup-noti
+.api-status .status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 5px;
+}
+
+.api-status .status-ok {
+    background-color: #2aa198;
+}
+
+.api-status .status-error {
+    background-color: #dc322f;
+}
+
+.api-status .status-unknown {
+    background-color: #839496;
+}
