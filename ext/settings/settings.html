@@ -16,36 +16,15 @@
         <div id="settings-section" class="section settings-section">
             <h2>AI Settings</h2>
             <label for="platform">Platform</label>
-            <select id="platf
-... (FILE CONTENT TRUNCATED) ...
-  <div class="input-group">
-                    <label class="small-label" for="cloudflare-api-key">API Key</label>
-                    <input type="password" id="cloudflare-api-key">
-                    <i class="fas fa-eye toggle-visibility" id="toggle-cloudflare-api-key"></i>
-                </div>
-                <button id="test-cloudflare" class="solarized-button test-button">Test</button>
-            </div>
-            <button id="save-api-keys" class="solarized-button">Save API Keys</button>
+            <select id="platform">
+                <option value="Gemini">Gemini</option>
+                <option value="Cloudflare Worker AI">Cloudflare Worker AI</option>
+                <option value="OpenRouter">OpenRouter</option>
+            </select>
 
-            <h2>API Status</h2>
-            <div class="api-status">
-                <label>Gemini:</label>
-                <span id="gemini-status" class="status-indicator status-unknown"></span>
-            </div>
-            <div class="api-status">
-                <label>OpenRouter:</label>
-                <span id="openrouter-status" class="status-indicator status-unknown"></span>
-            </div>
-            <div class="api-status">
-                <label>Cloudflare:</label>
-                <span id="cloudflare-status" class="status-indicator status-unknown"></span>
-            </div>
-        </div>
-        <div id="about-section" class="section" style="display: none;">
-            <h2>About</h2>
-            <p>Developed by John Le, 0KB.ORG.</p>
-        </div>
-    </div>
-    <script src="settings.js"></script>
-</body>
-</html>
+            <label for="model">Model</label>
+            <select id="model">
+            </select>
+
+            <label for="use-specific-model">Use Custom Model</label>
+            <input type="checkbox" id="use

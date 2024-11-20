@@ -45,9 +45,93 @@ body {
 }
 
 .cloudflare-group .test-button {
-  
-... (FILE CONTENT TRUNCATED) ...
-ss i {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    background-color: #268bd2;
+    color: #fdf6e3;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.input-group input {
+    width: 96%;
+    padding: 8px;
+    background-color: #073642;
+    color: #839496;
+    border: 1px solid #268bd2;
+    border-radius: 4px;
+}
+
+.small-label {
+    font-size: 0.8em;
+    color: #93a1a1;
+}
+
+select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    background-color: #073642;
+    color: #839496;
+    border: 1px solid #268bd2;
+    border-radius: 4px;
+}
+
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.solarized-button {
+    background-color: #268bd2;
+    color: #fdf6e3;
+}
+
+#custom-model {
+    margin-bottom: 20px;
+}
+
+/* Styles for visibility toggle icons */
+.toggle-visibility {
+    cursor: pointer;
+    margin-left: -30px;
+    position: relative;
+    top: 10px;
+    color: #839496;
+}
+
+/* Notification Popup Styles */
+.popup-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #073642;
+    color: #fdf6e3;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn 0.3s ease-out forwards;
+    min-width: 250px;
+}
+
+.popup-notification.success i {
     color: #2aa198;
 }
 

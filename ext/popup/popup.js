@@ -25,8 +25,42 @@ function populateModelDropdown(platform) {
 function updateUI(items) {
     const platformSelect = document.getElementById('platform');
     
-... (FILE CONTENT TRUNCATED) ...
- (platformSelect) {
+    if (platformSelect) {
+        platformSelect.value = items.platform || 'Gemini';
+        populateModelDropdown(items.platform || 'Gemini');
+    }
+
+    const modelSelect = document.getElementById('model');
+    if (modelSelect) {
+        modelSelect.value = items.model || '';
+    }
+}
+
+function saveSettings() {
+    const platform = document.getElementById('platform').value;
+    const model = document.getElementById('model').value;
+    
+    chrome.storage.sync.set({
+        platform: platform,
+        model: model
+    }, function() {
+        console.log('Settings saved');
+    });
+}
+
+function handlePlatformChange() {
+    const platform = document.getElementById('platform').value;
+    populateModelDropdown(platform);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    chrome.storage.sync.get([
+        'platform',
+        'model'
+    ], updateUI);
+
+    const platformSelect = document.getElementById('platform');
+    if (platformSelect) {
         platformSelect.addEventListener('change', handlePlatformChange);
     }
 
