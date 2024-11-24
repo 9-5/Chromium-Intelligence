@@ -7,173 +7,104 @@ const aiAssistantPrompts = {
         'Rewrite this:\n\n',
         'You are a writing assistant. Rewrite the text provided by the user to improve phrasing. Output ONLY the rewritten text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
     ],
-    'Friendly Tone': [
+    'Make Friendly': [
         'Make this sound more friendly:\n\n',
-        'You are a text rewriting assistant. Rewrite the text provided by the user to be more friendly, approachable, and casual. Focus on making the tone more inviting. Output ONLY the rewritten text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
+        'You are a writing assistant. Convert the text provided by the user to make it sound more friendly. Output ONLY the rewritten text without any additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
     ],
-    'Professional Tone': [
+    'Make Professional': [
         'Make this sound more professional:\n\n',
-        'You are a text rewriting assistant. Rewrite the text provided by the user to be more professional, formal, and suitable for business contexts. Focus on using precise language and avoiding colloquialisms. Output ONLY the rewritten text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
+        'You are a writing assistant. Convert the text provided by the user to make it sound more professional. Output ONLY the rewritten text without any additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
     ],
-    'Concise Rewrite': [
-        'Rewrite this concisely:\n\n',
-        'You are a text rewriting assistant. Rewrite the text provided by the user to be more concise and to-the-point, removing unnecessary words or phrases. Output ONLY the rewritten text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
+    'Make Concise': [
+        'Make this more concise:\n\n',
+        'You are a writing assistant. Rewrite the text provided by the user to make it more concise. Output ONLY the rewritten text without any additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
     ],
     'Summarize': [
         'Summarize this:\n\n',
-        'You are a summarization assistant. Summarize the text provided by the user, capturing the main points and key details. Output ONLY the summarized text without any additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
-    ],
-    'Sentiment Analysis': [
-        'Analyze the sentiment of this:\n\n',
-        'You are a sentiment analysis assistant. Analyze the text provided by the user and determine its overall sentiment (positive, negative, or neutral). Output ONLY the sentiment detected without any additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
+        'You are a summarization assistant. Summarize the text provided by the user. Output ONLY the summarized text without any additional comments. Respond in the same language as the input (e.g., English US, French). If the text is absolutely incompatible with this (e.g., totally random gibberish), output "ERROR_TEXT_INCOMPATIBLE_WITH_REQUEST".'
     ]
 };
 
 const apiHandlers = {
     gemini: {
         processText: async (text, prompt, apiKey) => {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${apiKey}`;
-            const data = {
-                contents: [{
-                    parts: [{ text: prompt + text }]
-                }],
-                generationConfig: {
-                    temperature: 0.7
-                }
-            };
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const json = await response.json();
             try {
-                return json.candidates[0].content.parts[0].text;
+                const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${apiKey}`;
+                const response = await fetch(geminiApiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: prompt + text
+                            }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.7
+                        }
+                    })
+                });
+    
+                if (!response.ok) {
+                    throw new Error(`Gemini API Error: ${response.status} ${response.statusText}`);
+                }
+    
+                const data = await response.json();
+                if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) {
+                    return data.candidates[0].content.parts[0].text;
+                } else {
+                    throw new Error('Unexpected response format from Gemini API');
+                }
             } catch (error) {
-                console.error("Gemini JSON response:", json);
-                throw new Error("Unexpected response format from Gemini. Check the console for the full response.");
+                console.error('Gemini API Error:', error);
+                throw error;
             }
         },
         processImage: async (base64Content, mimeType, prompt, apiKey) => {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${apiKey}`;
-
-            const data = {
-                contents: [{
-                    parts: [
-                        { text: prompt },
-                        {
-                            inlineData: {
-                                mimeType: mimeType,
-                                data: base64Content
-                            }
+            try {
+                const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${apiKey}`;
+                const imagePart = {
+                    inlineData: {
+                        mimeType: mimeType,
+                        data: base64Content
+                    }
+                };
+    
+                const textPart = {
+                    text: prompt
+                };
+    
+                const response = await fetch(geminiApiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [textPart, imagePart]
+                        }],
+                        generationConfig: {
+                            temperature: 0.4
                         }
-                    ]
-                }],
-                generationConfig: {
-                    temperature: 0.4,
-                    topP: 1,
-                    topK: 32,
-                    maxOutputTokens: 4096,
-                },
-            };
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const json = await response.json();
-
-            try {
-                return json.candidates[0].content.parts[0].text;
+                    })
+                });
+    
+                if (!response.ok) {
+                    throw new Error(`Gemini API Error: ${response.status} ${response.statusText}`);
+                }
+    
+                const data = await response.json();
+    
+                if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) {
+                    return data.candidates[0].content.parts[0].text;
+                } else {
+                    throw new Error('Unexpected response format from Gemini API');
+                }
             } catch (error) {
-                console.error("Gemini JSON response:", json);
-                throw new Error("Unexpected response format from Gemini. Check the console for the full response.");
-            }
-        }
-    },
-    openrouter: {
-        processText: async (text, prompt, apiKey, model) => {
-            const url = 'https://api.openrouter.ai/api/v1/chat/completions';
-            const headers = {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            };
-
-            const data = {
-                model: model,
-                messages: [{
-                    role: "user",
-                    content: prompt + text
-                }],
-                temperature: 0.7
-            };
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: headers,
-                body: JSON.stringify(data)
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const json = await response.json();
-            try {
-                return json.choices[0].message.content;
-            } catch (error) {
-                console.error("OpenRouter JSON response:", json);
-                throw new Error("Unexpected response format from OpenRouter. Check the console for the full response.");
-            }
-        }
-    },
-    cloudflare: {
-        processText: async (text, prompt, accountId, apiToken, model) => {
-            const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model}`;
-            const headers = {
-                'Authorization': `Bearer ${apiToken}`,
-                'Content-Type': 'application/json'
-            };
-            const data = {
-                messages: [{
-                    role: "user",
-                    content: prompt + text
-                }]
-            };
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: headers,
-                body: JSON.stringify(data)
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const json = await response.json();
-
-            try {
-                return json.result.response;
-            } catch (error) {
-                console.error("Cloudflare JSON response:", json);
-                throw new Error("Unexpected response format from Cloudflare. Check the console for the full response.");
+                console.error('Gemini API Error:', error);
+                throw error;
             }
         }
     }
@@ -181,110 +112,79 @@ const apiHandlers = {
 
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
-        id: "ai-assistant",
-        title: "AI Assistant",
-        contexts: ["selection", "image", "link"]
+        id: "ai-assistant-text",
+        title: "AI Assistant: %s",
+        contexts: ["selection"]
     });
 
-    for (const key in aiAssistantPrompts) {
-        chrome.contextMenus.create({
-            id: `ai-assistant-${key}`,
-            title: key,
-            parentId: "ai-assistant",
-            contexts: ["selection"]
-        });
-    }
+    chrome.contextMenus.create({
+        id: "ai-assistant-image",
+        title: "AI Assistant (Image)",
+        contexts: ["image"]
+    });
+
+    chrome.contextMenus.create({
+        id: "ai-assistant-link",
+        title: "AI Assistant (PDF Link)",
+        contexts: ["link"],
+        documentUrlPatterns: ["*://*/*.pdf"]
+    });
 });
 
-chrome.contextMenus.onClicked.addListener(async (data, tab) => {
-    let selectedText = data.selectionText;
-    let menuItemId = data.menuItemId;
-    let promptKey = menuItemId.split('ai-assistant-')[1];
-
-    if (promptKey) {
-        try {
-            const settings = await new Promise((resolve) => {
-                chrome.storage.sync.get([
-                    'platform',
-                    'model',
-                    'use_specific_model',
-                    'custom_model',
-                    'geminiApiKey',
-                    'openrouterApiKey',
-                    'cloudflareId',
-                    'cloudflareApiKey'
-                ], resolve);
-            });
-
-            let apiResponse;
-            let platform = settings.platform;
-            let model = settings.model;
-
-            if (settings.use_specific_model && settings.custom_model) {
-                model = settings.custom_model;
-            }
-
-            if (platform === 'Gemini') {
-                apiResponse = await apiHandlers.gemini.processText(
-                    selectedText,
-                    aiAssistantPrompts[promptKey][0],
-                    settings.geminiApiKey
-                );
-            } else if (platform === 'OpenRouter') {
-                apiResponse = await apiHandlers.openrouter.processText(
-                    selectedText,
-                    aiAssistantPrompts[promptKey][0],
-                    settings.openrouterApiKey,
-                    model
-                );
-            } else if (platform === 'Cloudflare Worker AI') {
-                apiResponse = await apiHandlers.cloudflare.processText(
-                    selectedText,
-                    aiAssistantPrompts[promptKey][0],
-                    settings.cloudflareId,
-                    settings.cloudflareApiKey,
-                    model
-                );
-            }
-
-            if (apiResponse) {
-                chrome.scripting.executeScript({
-                    target: { tabId: tab.id },
-                    function: showPopup,
-                    args: [apiResponse]
+chrome.contextMenus.onClicked.addListener((data, tab) => {
+    if (data.menuItemId === "ai-assistant-text") {
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            function: () => {
+                getSettings().then(settings => {
+                    chrome.runtime.sendMessage({ action: 'showPopup', data: { selectedText: window.getSelection().toString(), settings: settings } });
                 });
-            } else {
-                throw new Error('No response from AI platform.');
             }
-
-        } catch (error) {
-            console.error('Error processing text:', error);
-            chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                function: showPopup,
-                args: [`Error: ${error.message}`]
-            });
-        }
+        });
+    } else if (data.menuItemId === "ai-assistant-image") {
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            function: () => {
+                getSettings().then(settings => {
+                    chrome.runtime.sendMessage({ action: 'showPromptInput', fileUrl: data.srcUrl, fileType: 'image', settings: settings });
+                });
+            }
+        });
+    } else if (data.menuItemId === "ai-assistant-link") {
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            function: () => {
+                getSettings().then(settings => {
+                    chrome.runtime.sendMessage({ action: 'showPromptInput', fileUrl: data.linkUrl, fileType: 'pdf', settings: settings });
+                });
+            }
+        });
     }
-
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'processText') {
         (async () => {
             try {
-                const { text, prompt, platform, model, apiKey } = request.data;
+                const { selectedText, prompt, platform, model, use_specific_model, custom_model, geminiApiKey, openrouterApiKey, cloudflareId, cloudflareApiKey } = request.data;
+
+                let apiKey;
                 let response;
 
                 if (platform === 'Gemini') {
-                    response = await apiHandlers.gemini.processText(text, prompt, apiKey);
-                } else if (platform === 'OpenRouter') {
-                    response = await apiHandlers.openrouter.processText(text, prompt, apiKey, model);
+                    apiKey = geminiApiKey;
+                    response = await apiHandlers.gemini.processText(selectedText, prompt, apiKey);
                 } else if (platform === 'Cloudflare Worker AI') {
-                    response = await apiHandlers.cloudflare.processText(text, prompt, request.data.cloudflareId, request.data.cloudflareApiKey, model);
+                    // Placeholder
+                    response = 'Cloudflare Worker AI processing is not yet implemented.';
+                } else if (platform === 'OpenRouter') {
+                    // Placeholder
+                    response = 'OpenRouter processing is not yet implemented.';
                 } else {
-                    throw new Error('Invalid platform selected.');
+                    sendResponse({ error: 'Invalid platform selected.' });
+                    return;
                 }
+
                 sendResponse({ data: response });
             } catch (error) {
                 console.error('Error in background script:', error);
