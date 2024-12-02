@@ -7,6 +7,7 @@ const aiAssistantPrompts = {
         'Rewrite this:\n\n',
         'You are a writing assistant. Rewrite the text provided by the user to improve phrasing. Output ONLY the rewritten text without additional comments. Respond in the same language as the input (e.g., English US, French). If the text is abso
 ... (FILE CONTENT TRUNCATED) ...
+...
             }
         })();
         
