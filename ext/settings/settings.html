@@ -18,37 +18,44 @@
             <label for="platform">Platform</label>
             <select id="platform">
                 <option value="Gemini">Gemini</option>
-                <option value="Cloudflare Worker AI">Cloudflare Worker AI</option>
                 <option value="OpenRouter">OpenRouter</option>
+                <option value="Cloudflare Worker AI">Cloudflare Worker AI</option>
             </select>
             <label for="model">Model</label>
             <select id="model">
             </select>
-            <label for="use-specific-model">
-                <input type="checkbox" id="use-specific-model"> Use Specific Model
+            <label class="checkbox-label">
+                <input type="checkbox" id="use-specific-model">
+                Use specific model?
             </label>
             <label for="custom-model">Custom Model</label>
-            <input type="text" id="custom-model" disabled>
+            <input type="text" id="custom-model" placeholder="" disabled>
             <button id="save-settings" class="solarized-button">Save Settings</button>
         </div>
-        <div id="api-keys-section" class="section" style="display: none;">
+        <div id="api-keys-section" class="section api-keys-section" style="display: none;">
             <h2>API Keys</h2>
-            <div class="input-group">
-                <label class="small-label" for="gemini-api-key">Gemini API Key</label>
-                <input type="password" id="gemini-api-key">
-                <i class="fas fa-eye toggle-visibility" id="toggle-gemini-api-key"></i>
+            <label for="gemini-api-key">Gemini API Key</label>
+            <div class="platform-group">
+                <div class="input-group">
+                    <input type="password" id="gemini-api-key">
+                    <i class="fas fa-eye toggle-visibility" id="toggle-gemini"></i>
+                </div>
+                <button id="test-gemini" class="solarized-button test-button">Test</button>
             </div>
-            <button id="test-gemini" class="solarized-button test-button">Test</button>
-            <div class="input-group">
-                <label class="small-label" for="openrouter-api-key">OpenRouter API Key</label>
-                <input type="password" id="openrouter-api-key">
-                <i class="fas fa-eye toggle-visibility" id="toggle-openrouter-api-key"></i>
+            <label for="openrouter-api-key">OpenRouter API Key</label>
+            <div class="platform-group">
+                <div class="input-group">
+                    <input type="password" id="openrouter-api-key">
+                    <i class="fas fa-eye toggle-visibility" id="toggle-openrouter"></i>
+                </div>
+                <button id="test-openrouter" class="solarized-button test-button">Test</button>
             </div>
-            <button id="test-openrouter" class="solarized-button test-button">Test</button>
+            <label for="cloudflare-id">Cloudflare ID & API Key</label>
             <div class="cloudflare-group">
                 <div class="input-group">
-                    <label class="small-label" for="cloudflare-account-id">Account ID</label>
-                    <input type="text" id="cloudflare-account-id">
+                    <label class="small-label" for="cloudflare-id">ID</label>
+                    <input type="password" id="cloudflare-id">
+                    <i class="fas fa-eye toggle-visibility" id="toggle-cloudflare-id"></i>
                 </div>
                 <div class="input-group">
                     <label class="small-label" for="cloudflare-api-key">API Key</label>

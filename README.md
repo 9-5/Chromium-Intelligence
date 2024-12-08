@@ -20,7 +20,92 @@ A powerful Chromium extension that leverages the multiple AI APIs to assist with
   - Professional Tone Conversion
   - Concise Rewrites
   - Text Summarization
-  - Language Translation [Coming Soon at this point!]
+  - Key Points Extraction
+  - Step-by-Step Guide Conversion
+- **Image and PDF Processing**:
+  - Analyze images with custom prompts
+  - Process PDF files with custom prompts
+- **Custom Prompting**: Ability to input custom prompts for image and PDF analysis
+
+## Requirements
+
+- Chromium Based Browser [Chrome, Edge, Opera GX, Brave, etc.]
+- Gemini API Key (obtain from [Google AI Studio](https://ai.google.dev))
+- Cloudflare API Key (obtain from [Cloudflare AI](https://developers.cloudflare.com/workers-ai/models/))
+- OpenRouter API Key (obtain from [OpenRouter AI](https://openrouter.ai/))
+- Active internet connection
+
+## Setup
+
+1. Clone this repository or download the source code
+2. Open Chrome and navigate to `chrome://extensions/`
+3. Enable "Developer mode" in the top-right corner
+4. Click "Load unpacked" and select the extension directory
+5. Click the extension icon in your Chrome toolbar
+6. Enter your Gemini API key in the settings popup
+7. Test your API key using the "Test API Key" button
+
+## Usage
+
+### Text Operations
+1. Select any text on a webpage
+2. Right-click to open the context menu
+3. Choose one of the following operations:
+   - Proofread
+   - Rewrite
+   - Friendly
+   - Professional
+   - Concise
+   - Summary
+   - Key Points
+   - Stepify
+
+### Image Analysis
+1. Right-click on any image
+2. Select "Process Image" from the context menu
+3. Enter a custom prompt in the popup dialog
+4. Click "Submit" to analyze the image
+
+### PDF Processing
+1. Right-click on a PDF link
+2. Select "Process PDF" from the context menu
+3. Enter a custom prompt in the popup dialog
+4. Click "Submit" to process the PDF
+
+The processed text or analysis results will appear in a popup window with options to copy to clipboard or close.
+
+## Files Structure
+```
+\
+├── ext                     # Extension folder
+│   ├── logo.png            # Extension logo
+│   ├── icon                # Icon folder
+│   │   ├── icon16.png
+│   │   ├── icon32.png
+│   │   ├── icon48.png
+│   │   └── icon128.png
+│   ├── settings            # Settings folder
+│   │    ├── settings.html  # Extension settings
+│   │    ├── settings.css   # Extension settings UI
+│   │    └── settings.js    # Extension settings UI styles
+│   └── popup               # Popup folder
+│        ├── popup.html     # Popup UI
+│        ├── popup.css      # Popup UI styles
+│        └── popup.js       # Popup UI script
+├── manifest.json           # Extension configuration
+├── background.js           # Background service worker
+├── contents.js             # Content script for webpage interaction
+└── README.md               # This file
+```
+
+## Technical Details
+
+- Built using Manifest V3
+- Can use the Gemini, Cloudflare Worker AI, and OpenRouter APIs
+- Implements secure API key storage
+- Features responsive popup UI
+- Maintains original text language in responses
+- Supports image and PDF processing with custom prompts [Gemini only at this point!]
 
 ## Privacy Notice
 

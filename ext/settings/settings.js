@@ -8,12 +8,6 @@ const platformModels = {
     'OpenRouter': []
 };
 
-const apiStatus = {
-    'Gemini': 'unknown',
-    'OpenRouter': 'unknown',
-    'Cloudflare': 'unknown'
-};
-
 function populateModelDropdown(platform) {
     const modelSelect = document.getElementById('model');
     const customModelInput = document.getElementById('custom-model');
@@ -28,89 +22,360 @@ function populateModelDropdown(platform) {
             option.textContent = model;
             modelSelect.appendChild(option);
         });
+        
+        if (platform === 'Gemini') {
+            modelSelect.disabled = useSpecificModel.checked;
+            customModelInput.disabled = !useSpecificModel.checked;
+        } else {
+            modelSelect.disabled = true;
+            customModelInput.disabled = false;
+            useSpecificModel.checked = true;
+        }
+    } else {
+        modelSelect.disabled = true;
+        customModelInput.disabled = false;
+        useSpecificModel.checked = true;
     }
-
-    customModelInput.disabled = !useSpecificModel.checked;
-    modelSelect.disabled = useSpecificModel.checked;
 }
 
-function updateUI(items) {
+function handlePlatformChange() {
     const platformSelect = document.getElementById('platform');
-    const modelSelect = document.getElementById('model');
-    const customModelInput = document.getElementById('custom-model');
-    const useSpecificModel = document.getElementById('use-specific-model');
+    const selectedPlatform = platformSelect.value;
+    populateModelDropdown(selectedPlatform);
+    toggleModelSelection();
+}
+
+function toggleVisibility(inputId, iconId) {
+    var input = document.getElementById(inputId);
+    var icon = document.getElementById(iconId);
+    if (input.type === "password") {
+        input.type = "text";
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = "password";
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+function toggleModelSelection() {
+    var useSpecificModel = document.getElementById('use-specific-model');
+    var modelDropdown = document.getElementById('model');
+    var customModelInput = document.getElementById('custom-model');
+    var platformDropdown = document.getElementById('platform');
+
+    if (useSpecificModel.checked || platformDropdown.value === "Cloudflare Worker AI" || platformDropdown.value === "OpenRouter") {
+        modelDropdown.value = "";
+        modelDropdown.disabled = true;
+        customModelInput.disabled = false;
+        useSpecificModel.checked = true;
+    } else {
+        modelDropdown.disabled = false;
+        if (platformModels[platformDropdown.value] && platformModels[platformDropdown.value].length > 0) {
+            modelDropdown.value = platformModels[platformDropdown.value][0];
+        }
+        customModelInput.value = "";
+        customModelInput.disabled = true;
+    }
+}
+
+function buttonStatus(message, type = 'success') {
+    const existingNotifications = document.querySelectorAll('.popup-notification');
+    existingNotifications.forEach(notification => {
+        notification.remove();
+    });
+
+    const notification = document.createElement('div');
+    notification.className = `popup-notification ${type}`;
+    const icon = type === 'success' ? 'check-circle' : 'exclamation-circle';
     
-    if (platformSelect) {
-        platformSelect.value = items.platform || 'Gemini';
-        populateModelDropdown(platformSelect.value);
+    notification.innerHTML = `
+        <i class="fas fa-${icon}"></i>
+        <span class="message">${message}</span>
+        <i class="fas fa-times close-btn"></i>
+    `;
+    
+    document.body.appendChild(notification);
+
+    const closeBtn = notification.querySelector('.close-btn');
+    closeBtn.addEventListener('click', () => {
+        notification.classList.add('hiding');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    });
+
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.classList.add('hiding');
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }
+    }, 5000);
+}
+
+async function testGeminiAPI() {
+    const apiKey = document.getElementById('gemini-api-key').value;
+    if (!apiKey) {
+        buttonStatus('Please enter a Gemini API key.', 'error');
+        return;
     }
-    if (modelSelect) {
-        modelSelect.value = items.model || platformModels[platformSelect.value][0];
-    }
-    if (customModelInput) {
-        customModelInput.value = items.custom_model || '';
-    }
-    if (useSpecificModel) {
-        useSpecificModel.checked = items.use_specific_model || false;
+
+    try {
+        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + apiKey, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                contents: {
+                    parts: {
+                        text: "Hello! This is a test message. Please respond with 'API test successful' if you receive this."
+                    }
+                }
+            })
+        });
+
+        const data = await response.json();
+        if (response.ok && data.candidates && data.candidates[0].content) {
+            buttonStatus('Gemini API test successful!', 'success');
+        } else {
+            throw new Error(data.error?.message || 'Unknown error occurred');
+        }
+    } catch (error) {
+        buttonStatus('Gemini API test failed: ' + error.message, 'error');
     }
 }
 
-function saveSettings() {
-    const platformSelect = document.getElementById('platform');
+async function testOpenRouterAPI() {
+    const apiKey = document.getElementById('openrouter-api-key').value;
+    if (!apiKey) {
+        buttonStatus('Please enter an OpenRouter API key.', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+                'HTTP-Referer': 'https://github.com/9-5/chromium-intelligence',
+                'X-Title': 'Chromium Intelligence'
+            },
+            body: JSON.stringify({
+                model: 'openai/gpt-3.5-turbo',
+                messages: [
+                    { role: 'user', content: "Hello! This is a test message. Please respond with 'API test successful' if you receive this." }
+                ]
+            })
+        });
+
+        const data = await response.json();
+        if (response.ok && data.choices && data.choices[0].message) {
+            buttonStatus('OpenRouter API test successful!', 'success');
+        } else {
+            throw new Error(data.error?.message || 'Unknown error occurred');
+        }
+    } catch (error) {
+        buttonStatus('OpenRouter API test failed: ' + error.message, 'error');
+    }
+}
+
+async function testCloudflareAPI() {
+    const accountId = document.getElementById('cloudflare-id').value;
+    const apiKey = document.getElementById('cloudflare-api-key').value;
+    
+    if (!accountId || !apiKey) {
+        buttonStatus('Please enter both Cloudflare Account ID and API Key', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/@cf/meta/llama-2-7b-chat-int8`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                messages: [
+                    { role: 'user', content: "Hello! This is a test message. Please respond with 'API test successful' if you receive this." }
+                ]
+            })
+        });
+
+        const data = await response.json();
+        if (response.ok && data.success) {
+            buttonStatus('Cloudflare API test successful!', 'success');
+        } else {
+            throw new Error(data.errors?.[0]?.message || 'Unknown error occurred');
+        }
+    } catch (error) {
+        buttonStatus('Cloudflare API test failed: ' + error.message, 'error');
+    }
+}
+
+function setModelValue(savedModel) {
     const modelSelect = document.getElementById('model');
-    const customModelInput = document.getElementById('custom-model');
-    const useSpecificModel = document.getElementById('use-specific-model');
+    if (savedModel && Array.from(modelSelect.options).some(option => option.value === savedModel)) {
+        modelSelect.value = savedModel;
+        console.log('Setting model to saved value:', savedModel);
+    } else {
+        console.log('Saved model not found in options, defaulting to first option');
+        modelSelect.selectedIndex = 0;
+    }
+}
+
+
+function loadSettings() {
+    chrome.storage.sync.get({
+        'platform': 'Gemini',
+        'model': 'gemini-1.5-flash',
+        'useSpecificModel': false,
+        'custom_model': '',
+        'geminiApiKey': '',
+        'openrouterApiKey': '',
+        'cloudflareId': '',
+        'cloudflareApiKey': ''
+    }, function(items) {
+        console.log('Loaded settings:', items);
+        document.getElementById('platform').value = items.platform;
+        
+        populateModelDropdown(items.platform);
+        
+        setTimeout(() => {
+            setModelValue(items.model);
+        }, 0);
+        
+        document.getElementById('use-specific-model').checked = items.useSpecificModel;
+        document.getElementById('custom-model').value = items.custom_model;
+        document.getElementById('gemini-api-key').value = items.geminiApiKey;
+        document.getElementById('openrouter-api-key').value = items.openrouterApiKey;
+        document.getElementById('cloudflare-id').value = items.cloudflareId;
+        document.getElementById('cloudflare-api-key').value = items.cloudflareApiKey;
+        
+        toggleModelSelection();
+    });
+}
+function saveSettings() {
+    const platform = document.getElementById('platform').value;
+    const model = document.getElementById('model').value;
+    const useSpecificModel = document.getElementById('use-specific-model').checked;
+    const customModel = document.getElementById('custom-model').value;
 
     chrome.storage.sync.set({
-        platform: platformSelect.value,
-        model: modelSelect.value,
-        custom_model: customModelInput.value,
-        use_specific_model: useSpecificModel.checked
-    }, () => {
-        showNotification('Settings saved!', 'success');
+        platform: platform,
+        model: model,
+        useSpecificModel: useSpecificModel,
+        custom_model: customModel
+    }, function() {
+        console.log('Saved settings:', { platform, model, useSpecificModel, custom_model: customModel });
+        buttonStatus('Settings saved!', 'success');
     });
 }
 
 function saveApiKeys() {
-    const geminiApiKey = document.getElementById('gemini-api-key').value;
-    const openrouterApiKey = document.getElementById('openrouter-api-key').value;
-    const cloudflareAccountId = document.getElementById('cloudflare-account-id').value;
-    const cloudflareApiKey = document.getElementById('cloudflare-api-key').value;
-
     chrome.storage.sync.set({
-        geminiApiKey: geminiApiKey,
-        openrouterApiKey: openrouterApiKey,
-        cloudflareId: cloudflareAccountId,
-        cloudflareApiKey: cloudflareApiKey
-    }, () => {
-        showNotification('API Keys saved!', 'success');
+        geminiApiKey: document.getElementById('gemini-api-key').value,
+        openrouterApiKey: document.getElementById('openrouter-api-key').value,
+        cloudflareId: document.getElementById('cloudflare-id').value,
+        cloudflareApiKey: document.getElementById('cloudflare-api-key').value
+    }, function() {
+        buttonStatus('API keys saved!', 'success');
     });
 }
 
-function showNotification(message, type) {
-    const notification = document.createElement('div');
-    notification.classList.add('popup-notification', type);
-    notification.innerHTML = `
-        <i class="fas fa-check-circle"></i>
-        <div class="message">${message}</div>
-        <div class="close-btn">&times;</div>
-    `;
-    document.body.appendChild(notification);
+document.addEventListener('DOMContentLoaded', function() {
+    loadSettings();
 
-    notification.querySelector('.close-btn').addEventListener('click', () => {
-        notification.classList.add('hiding');
-        notification.addEventListener('animationend', () => {
-            notification.remove();
+    const navLinks = document.querySelectorAll('.navbar a');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetSectionId = this.getAttribute('data-section');
+            showSection(targetSectionId);
+            
+            navLinks.forEach(navLink => navLink.classList.remove('active'));
+            this.classList.add('active');
         });
     });
 
-    setTimeout(() => {
-        notification.classList.add('hiding');
-        notification.addEventListener('animationend', () => {
-            notification.remove();
+    const toggleGeminiButton = document.getElementById('toggle-gemini');
+    if (toggleGeminiButton) {
+        toggleGeminiButton.addEventListener('click', function() {
+            toggleVisibility('gemini-api-key', 'toggle-gemini');
         });
-    }, 3000);
-}
+    }
 
-function testGeminiAPI() {
-    const apiKey = document.getElementById('gemini-api-
+    const toggleOpenRouter = document.getElementById('toggle-openrouter');
+    if (toggleOpenRouter) {
+        toggleOpenRouter.addEventListener('click', function() {
+            toggleVisibility('openrouter-api-key', 'toggle-openrouter');
+        });
+    }
+
+    const toggleCloudflareID = document.getElementById('toggle-cloudflare-id');
+    if (toggleCloudflareID) {
+        toggleCloudflareID.addEventListener('click', function() {
+            toggleVisibility('cloudflare-id', 'toggle-cloudflare-id');
+        });
+    }
+
+    const toggleCloudflareKey = document.getElementById('toggle-cloudflare-api-key');
+    if (toggleCloudflareKey) {
+        toggleCloudflareKey.addEventListener('click', function() {
+            toggleVisibility('cloudflare-api-key', 'toggle-cloudflare-api-key');
+        });
+    }
+
+
+    const platformSelect = document.getElementById('platform');
+    if (platformSelect) {
+        platformSelect.addEventListener('change', handlePlatformChange);
+    }
+
+    const useSpecificModelCheckbox = document.getElementById('use-specific-model');
+    if (useSpecificModelCheckbox) {
+        useSpecificModelCheckbox.addEventListener('change', toggleModelSelection);
+    }
+
+    const saveSettingsButton = document.getElementById('save-settings');
+    if (saveSettingsButton) {
+        saveSettingsButton.addEventListener('click', saveSettings);
+    }
+
+    const saveApiKeysButton = document.getElementById('save-api-keys');
+    if (saveApiKeysButton) {
+        saveApiKeysButton.addEventListener('click', saveApiKeys);
+    }
+
+    const testGeminiButton = document.getElementById('test-gemini');
+    if (testGeminiButton) {
+        testGeminiButton.addEventListener('click', testGeminiAPI);
+    }
+
+    const testOpenRouterButton = document.getElementById('test-openrouter');
+    if (testOpenRouterButton) {
+        testOpenRouterButton.addEventListener('click', testOpenRouterAPI);
+    }
+
+    const testCloudflareButton = document.getElementById('test-cloudflare');
+    if (testCloudflareButton) {
+        testCloudflareButton.addEventListener('click', testCloudflareAPI);
+    }
+
+    showSection('settings-section');
+});
+
+function showSection(sectionId) {
+    document.querySelectorAll('.section').forEach(section => {
+        section.style.display = 'none';
+    });
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.style.display = 'block';
+    }
+}

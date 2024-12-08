@@ -45,94 +45,138 @@ body {
 }
 
 .cloudflare-group .test-button {
-    margin-top: 10px;
+    align-self: flex-start;
+    margin-top: 20px;
 }
 
-.section {
-    margin-bottom: 20px;
+.platform-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
 }
-label {
-    display: block;
-    margin-bottom: 5px;
+
+.platform-group .input-group {
+    margin-bottom: 0;
 }
-input[type="text"],
-input[type="password"],
-select {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
+.platform-group .test-button {
+    align-self: flex-start;
+    margin-top: 3px;
+}
+
+.solarized-button {
     background-color: #073642;
     color: #839496;
     border: 1px solid #268bd2;
-    box-sizing: border-box;
-}
-button {
-    background-color: #268bd2;
-    color: white;
-    padding: 10px 15px;
-    border: none;
+    padding: 5px 12px;
+    margin-right: 10px;
     cursor: pointer;
-    border-radius: 5px;
-}
-button:hover {
-    background-color: #2aa198;
-}
-.input-group {
-    position: relative;
-    margin-bottom: 10px;
+    transition: background-color 0.3s, color 0.3s;
 }
 
-.input-group .small-label {
-    font-size: 0.8em;
-    color: #93a1a1;
+.solarized-button:hover {
+    background-color: #268bd2;
+    color: #002b36;
 }
-.input-group .toggle-visibility {
+
+.solarized-button:active {
+    background-color: #2aa198;
+}
+
+.settings-section, .api-keys-section {
+    margin-top: 20px;
+}
+.settings-section h2, .api-keys-section h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+.settings-section label, .api-keys-section label {
+    display: block;
+    margin-bottom: 5px;
+}
+.settings-section select, .settings-section input, .api-keys-section input {
+    width: 200px;
+    padding: 5px;
+    margin-bottom: 20px;
+    background-color: #073642;
+    color: #839496;
+    border: 1px solid #268bd2;
+}
+.settings-section .checkbox-label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.settings-section .checkbox-label input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    margin-right: 8px;
+}
+
+
+.api-keys-section .input-group {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 20px;
+}
+
+.api-keys-section .input-group input {
+    width: 100%;
+    padding: 8px;
+    padding-right: 30px;
+    box-sizing: border-box;
+}
+
+.api-keys-section .input-group .toggle-visibility {
     position: absolute;
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
-    color: #586e75;
-}
-.solarized-button {
-    background-color: #268bd2;
-    color: #fdf6e3;
+    color: #839496;
+    background: none;
     border: none;
-    padding: 10px 20px;
-    margin: 5px 0;
-    border-radius: 5px;
-    cursor: pointer;
-    display: inline-block;
-    text-decoration: none;
-    font-size: 14px;
+    padding: 0;
 }
-
-.solarized-button:hover {
-    background-color: #2aa198;
+.api-keys-section .small-label {
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+.api-keys-section .input-group .toggle-visibility:hover {
+    color: #268bd2;
 }
 
 .popup-notification {
     position: fixed;
     top: 20px;
     right: 20px;
+    padding: 15px 20px;
     background-color: #073642;
+    border: 1px solid #268bd2;
     color: #839496;
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    z-index: 10000;
     display: flex;
     align-items: center;
     gap: 10px;
-    z-index: 1000;
-    animation: slideIn 0.3s ease-out forwards;
+    min-width: 200px;
+    max-width: 400px;
+    animation: slideIn 0.3s ease-out;
 }
 
 .popup-notification.success {
-    border-left: 5px solid #2aa198;
+    border-color: #2aa198;
 }
 
 .popup-notification.error {
-    border-left: 5px solid #dc322f;
+    border-color: #dc322f;
+}
+
+.popup-notification i {
+    font-size: 18px;
 }
 
 .popup-notification.success i {
